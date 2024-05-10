@@ -4,7 +4,7 @@ import {
   StyleSheet,
   Text,
 } from 'react-native';
-import colors from '../styles/colors';
+import colors from '../helper/colors';
 
 function Price(): React.JSX.Element {
 
