@@ -2,7 +2,17 @@ import React from 'react';
 import {Text, TouchableOpacity, View} from 'react-native';
 import colors from '../../helper/colors';
 
-function CustomButton({children, disabledBtn, onPressBtn}) {
+interface CustomButttonUIProps {
+  children?: React.ReactNode;
+  disabledBtn?: boolean;
+  onPressBtn: () => void;
+}
+
+function CustomButton({
+  children,
+  disabledBtn,
+  onPressBtn,
+}: CustomButttonUIProps) {
   return (
     <View style={{marginBottom: 20}}>
       <TouchableOpacity

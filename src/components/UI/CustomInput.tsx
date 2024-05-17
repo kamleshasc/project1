@@ -1,71 +1,48 @@
 import React from 'react';
-import {Image, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import {StyleSheet, TextInput, TouchableOpacity, View} from 'react-native';
 import {HelperText} from 'react-native-paper';
 import colors from '../../helper/colors';
+import {Props} from 'react-native-paper/lib/typescript/components/Searchbar';
+
+interface CustomInputUIProps {
+  showIcon?: boolean;
+  textInputConfig: Props;
+  disableInput?: boolean;
+  isError?: boolean;
+  errorMsg?: string;
+  iconPressed?: () => void;
+  children?: React.ReactNode;
+}
 
 function CustomInput({
   showIcon,
-  showText,
   textInputConfig,
   disableInput,
   isError,
   errorMsg,
   iconPressed,
   children,
-}) {
+}: CustomInputUIProps) {
   return (
     <>
-      <View
-        style={[
-          {
-            borderWidth: 1.5,
-            borderColor: colors.secondaryDark,
-            backgroundColor: colors.primary,
-            borderRadius: 8,
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginBottom: 20,
-            marginHorizontal: 20,
-            paddingVertical: 4,
-          },
-        ]}>
-        <View
-          style={[
-            {width: '90%', marginLeft: 8},
-            showIcon && {width: '85%'},
-            showText && {width: '69%'},
-          ]}>
+      <View style={styles.container}>
+        <View style={{width: showIcon ? '85%' : '90%'}}>
           <TextInput
-            style={[
-              {
-                fontSize: 16,
-                lineHeight: 22,
-                color: '#4E5969',
-              },
-              disableInput && {color: '#86909C'},
-            ]}
+            style={styles.fontStyle}
             editable={!disableInput}
-            placeholderTextColor={'#C9CDD4'}
             {...textInputConfig}
           />
         </View>
-
         {showIcon && (
           <TouchableOpacity
-            style={{
-              height: 30,
-              width: 30,
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginLeft: 4,
-            }}
+            style={styles.childrenContainer}
             onPress={iconPressed}>
             {children}
           </TouchableOpacity>
         )}
       </View>
       {isError && (
-        <View style={{marginTop: -20, marginLeft: 16}}>
+        <View style={styles.errorContainer}>
           <HelperText type="error" visible={true} style={{}}>
             {errorMsg}
           </HelperText>
@@ -76,3 +53,35 @@ function CustomInput({
 }
 
 export default CustomInput;
+
+const styles = StyleSheet.create({
+  container: {
+    borderWidth: 1.5,
+    borderColor: colors.secondaryDark,
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    marginHorizontal: 20,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    justifyContent: 'space-between',
+  },
+  fontStyle: {
+    fontSize: 16,
+    lineHeight: 22,
+    color: colors.fontDark,
+  },
+  childrenContainer: {
+    height: 30,
+    width: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 4,
+  },
+  errorContainer: {
+    marginTop: -20,
+    marginLeft: 16,
+  },
+});

@@ -1,13 +1,8 @@
 import React, {useState} from 'react';
-// import RNDateTimePicker from '@react-native-community/datetimepicker';
-// import PropTypes from 'prop-types';
 import DatePicker from 'react-native-date-picker';
-// import {View} from 'react-native';
 import {
   View,
-  Button,
   Modal,
-  Platform,
   StyleSheet,
   TouchableOpacity,
   Text,

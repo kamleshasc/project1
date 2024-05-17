@@ -7,11 +7,13 @@ import DrawerNavigation from './DrawerNavigation';
 import AddUser from '../screen/AddUser';
 import EditUser from '../screen/EditUser';
 import colors from '../helper/colors';
+import AddService from '../screen/AddService';
 
 export type RootStackParamList = {
   DrawerNavigation: undefined;
   AddUser: undefined;
   EditUser: undefined;
+  AddService: undefined;
 };
 
 export type RootStackNavigationProp = StackNavigationProp<RootStackParamList>;
@@ -40,6 +42,11 @@ function RootNavigation() {
       <Stack.Screen
         name="EditUser"
         component={EditUser}
+        options={{headerShown: true}}
+      />
+      <Stack.Screen
+        name="AddService"
+        component={AddService}
         options={{headerShown: true}}
       />
     </Stack.Navigator>
