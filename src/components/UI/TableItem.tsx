@@ -1,14 +1,15 @@
 import React from 'react';
 import {View, Text, Image, StyleSheet} from 'react-native';
-import {rMS, rS, rV} from '../../helper/responsive';
-import colors from '../../helper/colors';
+import {rMS, rS} from '../../config/responsive';
+import colors from '../../config/colors';
 
 interface TableItemProps {
-  name: string;
+  name?: string;
   ImgUrl?: string;
+  bunchData?: any[];
 }
 
-const TableItem: React.FC<TableItemProps> = ({name, ImgUrl}) => {
+const TableItem: React.FC<TableItemProps> = ({name, ImgUrl, bunchData}) => {
   return (
     <View style={styles.container}>
       {ImgUrl ? (
@@ -22,6 +23,8 @@ const TableItem: React.FC<TableItemProps> = ({name, ImgUrl}) => {
             }}
           />
         </View>
+      ) : bunchData && bunchData.length > 0 ? (
+        <Text style={styles.text}>{bunchData.toString()}</Text>
       ) : (
         <Text style={styles.text}>{name}</Text>
       )}
@@ -34,9 +37,10 @@ const styles = StyleSheet.create({
     paddingVertical: rMS(6),
     paddingHorizontal: rMS(2),
     backgroundColor: colors.primary,
-    width: rS(80),
+    width: rS(81),
     alignItems: 'center',
     justifyContent: 'center',
+    minHeight:60
   },
   imageContainer: {
     height: 50,
@@ -51,7 +55,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: '#000',
-    fontSize: rMS(11),
+    fontSize: rMS(12),
     fontWeight: '500',
   },
 });

@@ -1,7 +1,7 @@
 import React from 'react';
 import {Text, View, StyleSheet} from 'react-native';
-import {rMS, rS} from '../../helper/responsive';
-import colors from '../../helper/colors';
+import {rMS, rS} from '../../config/responsive';
+import colors from '../../config/colors';
 
 interface TableHeaderProps {
   headers: string[];
@@ -27,9 +27,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.secondary,
   },
   header: {
-    width: rS(80),
+    width: rS(81),
     paddingVertical: rMS(8),
-    paddingHorizontal: rMS(2),
+    paddingHorizontal: rMS(4),
+    minHeight: 60,
+    justifyContent:'center'
   },
   headerText: {
     fontSize: rMS(13),

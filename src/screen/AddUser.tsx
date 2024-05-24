@@ -1,19 +1,21 @@
 import React from 'react';
 import {SafeAreaView, ScrollView, StyleSheet, Text, View} from 'react-native';
-import colors from '../helper/colors';
+import colors from '../config/colors';
 import CustomInput from '../components/UI/CustomInput';
 import Icon from 'react-native-vector-icons/AntDesign';
 import CustomButton from '../components/UI/CustomButton';
-import {rMS} from '../helper/responsive';
+import {rMS} from '../config/responsive';
 import DatePickerUI from '../components/UI/DatePickerUI';
 import CustomDropdown from '../components/UI/CustomDropdown';
-import {DateFormateMMMMDDYYY} from '../helper/dateFormater';
+import {DateFormateMMMMDDYYY} from '../config/dateFormater';
 import {
   launchImageLibrary,
   ImageLibraryOptions,
   ImagePickerResponse,
 } from 'react-native-image-picker';
 import ToastMessage from '../components/UI/ToastMessage';
+import {useSelector} from 'react-redux';
+import {RootState} from '../redux/store';
 
 const roleData = [
   {label: 'Super User', value: 'Super User'},
@@ -83,6 +85,8 @@ function AddUser(this: any): React.JSX.Element {
   const reg =
     /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|international|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i;
   let numbers = /^\d+$/;
+
+  const {value} = useSelector((state: RootState) => state.user);
 
   const handleDateChange = (value: Date) => {
     setShowDate(false);
@@ -419,7 +423,9 @@ function AddUser(this: any): React.JSX.Element {
             errorMsg={inputs.status.message}
             onChange={onChangeStatus}
           />
-          <CustomButton onPressBtn={() => checkValidation()}>Submit</CustomButton>
+          <CustomButton onPressBtn={() => checkValidation()}>
+            Submit
+          </CustomButton>
         </View>
       </ScrollView>
       <ToastMessage

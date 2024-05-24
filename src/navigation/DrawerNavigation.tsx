@@ -10,7 +10,7 @@ import Packages from '../screen/Packages';
 import Clients from '../screen/Clients';
 import Price from '../screen/Price';
 import Inventory from '../screen/Inventory';
-import colors from '../helper/colors';
+import colors from '../config/colors';
 
 export type DrawerNavigationParamList = {
   Dashboard: undefined;

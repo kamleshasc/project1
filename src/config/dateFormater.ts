@@ -1,5 +1,4 @@
 export const DateFormateMMMMDDYYY = (value: Date) => {
-  console.log(value, 'ddddddd');
 
   const date = new Date(value);
   const month = date.toLocaleString('en-GB', {month: 'long'});

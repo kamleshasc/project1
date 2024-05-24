@@ -1,12 +1,17 @@
 import React from 'react';
-import {StyleSheet, TextInput, TouchableOpacity, View} from 'react-native';
+import {
+  StyleSheet,
+  TextInput,
+  TextInputProps,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {HelperText} from 'react-native-paper';
-import colors from '../../helper/colors';
-import {Props} from 'react-native-paper/lib/typescript/components/Searchbar';
+import colors from '../../config/colors';
 
 interface CustomInputUIProps {
   showIcon?: boolean;
-  textInputConfig: Props;
+  textInputConfig: TextInputProps;
   disableInput?: boolean;
   isError?: boolean;
   errorMsg?: string;
@@ -43,7 +48,7 @@ function CustomInput({
       </View>
       {isError && (
         <View style={styles.errorContainer}>
-          <HelperText type="error" visible={true} style={{}}>
+          <HelperText type="error" visible={true} style={styles.errorText}>
             {errorMsg}
           </HelperText>
         </View>
@@ -83,5 +88,10 @@ const styles = StyleSheet.create({
   errorContainer: {
     marginTop: -20,
     marginLeft: 16,
+    marginBottom: 4,
+  },
+  errorText: {
+    fontSize: 13,
+    fontWeight: '700',
   },
 });

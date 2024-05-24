@@ -7,14 +7,18 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import colors from '../helper/colors';
+import colors from '../config/colors';
 import Icon from 'react-native-vector-icons/AntDesign';
 import useDimensionListener from '../hooks/useDimensionListener';
-import {rMS} from '../helper/responsive';
+import {rMS} from '../config/responsive';
 import TableHeader from '../components/UI/TableHeader';
 import TableRow from '../components/UI/TableRow';
 import TableItem from '../components/UI/TableItem';
 import {RootStackNavigationProp} from '../navigation/RootNavigation';
+import {TypedUseSelectorHook, useDispatch, useSelector} from 'react-redux';
+import {fetchGetUser} from '../redux/Action/userAction';
+import {AppDispatch, RootState} from '../redux/store';
+import {useAppDispatch, useAppSelector} from '../hooks/storeHook';
 
 interface UserData {
   key: number;
@@ -123,6 +127,32 @@ function Users({navigation}: UsersProps) {
     },
   ]);
 
+  const dispatch = useAppDispatch();
+  const {data, isLoader, isError, errorMsg} = useAppSelector(
+    state => state.user,
+  );
+  console.log(
+    isLoader,
+    '<= isLoader',
+    data,
+    '<= data',
+    errorMsg,
+    '<= errrr',
+    isError,
+    '<= isError',
+  );
+
+  // console.log(
+  //   data,
+  //   'prrrrr',
+  //   isLoader,
+  //   'isLoader',
+  //   isError,
+  //   'isError',
+  //   errorMsg,
+  //   'errorMsg',
+  // );
+
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -139,8 +169,11 @@ function Users({navigation}: UsersProps) {
 
   function renderItem({item}: {item: UserData}) {
     return (
-      <TableRow onPress={() => navigation.navigate('EditUser')}>
-        <TableItem ImgUrl={'kk'} name={item.userImg} />
+      <TableRow
+        onPress={() => {
+          dispatch(fetchGetUser());
+        }}>
+        <TableItem ImgUrl={'kk'} />
         <TableItem name={item.firstname} />
         <TableItem name={item.lastname} />
         <TableItem name={item.title} />
@@ -157,45 +190,30 @@ function Users({navigation}: UsersProps) {
 
   return (
     <SafeAreaView style={style.container}>
-      <View
-        style={[
-          style.fullScreen,
-          {
-            width: rMS(dimensions.screen.width, 2),
-          },
-        ]}>
-        <ScrollView
-          style={[
-            style.fullScreen,
-            {
-              width: rMS(dimensions.screen.width, 0),
-            },
-          ]}
-          horizontal={true}>
-          <View style={style.fullScreen}>
-            <TableHeader
-              headers={[
-                'User Image',
-                'First Name',
-                'Last Name',
-                'Title',
-                'Mobile Number',
-                'Email',
-                'Date Of Joining',
-                'Created Date',
-                'Modified Date',
-                'Role',
-                'Status',
-              ]}
-            />
-            <FlatList
-              data={items}
-              renderItem={renderItem}
-              keyExtractor={item => item.key.toString()}
-            />
-          </View>
-        </ScrollView>
-      </View>
+      <ScrollView style={style.fullScreen} horizontal={true}>
+        <View style={style.fullScreen}>
+          <TableHeader
+            headers={[
+              'User Image',
+              'First Name',
+              'Last Name',
+              'Title',
+              'Mobile Number',
+              'Email',
+              'Date Of Joining',
+              'Created Date',
+              'Modified Date',
+              'Role',
+              'Status',
+            ]}
+          />
+          <FlatList
+            data={items}
+            renderItem={renderItem}
+            keyExtractor={item => item.key.toString()}
+          />
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

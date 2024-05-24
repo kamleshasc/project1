@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Text,
 } from 'react-native';
-import colors from '../../helper/colors';
+import colors from '../../config/colors';
 
 interface DatePickerUIProps {
   handleCancelPressed: () => void;

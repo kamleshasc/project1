@@ -1,13 +1,13 @@
 import React from 'react';
 import {SafeAreaView, ScrollView, StyleSheet, Text, View} from 'react-native';
-import colors from '../helper/colors';
+import colors from '../config/colors';
 import CustomInput from '../components/UI/CustomInput';
 import Icon from 'react-native-vector-icons/AntDesign';
 import CustomButton from '../components/UI/CustomButton';
-import {rMS} from '../helper/responsive';
+import {rMS} from '../config/responsive';
 import DatePickerUI from '../components/UI/DatePickerUI';
 import CustomDropdown from '../components/UI/CustomDropdown';
-import {DateFormateMMMMDDYYY} from '../helper/dateFormater';
+import {DateFormateMMMMDDYYY} from '../config/dateFormater';
 import {
   launchImageLibrary,
   ImageLibraryOptions,
@@ -26,7 +26,7 @@ const statusData = [
   {label: 'Deactive', value: 'Deactive'},
 ];
 
-function EditUser(this: any): React.JSX.Element {
+function EditUser(): React.JSX.Element {
   const [selectedDate, setSelectedDate] = React.useState(new Date());
   const [inputs, setInputs] = React.useState({
     firstname: {
@@ -84,6 +84,18 @@ function EditUser(this: any): React.JSX.Element {
     /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|international|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i;
   let numbers = /^\d+$/;
 
+  const {
+    firstname,
+    lastname,
+    email,
+    mobileno,
+    title,
+    DOJ,
+    role,
+    status,
+    userImg,
+  } = inputs;
+
   function inputChangedHandler(inputIdentifier: any, enteredValue: any): void {
     try {
       setInputs(curInputs => {
@@ -102,7 +114,6 @@ function EditUser(this: any): React.JSX.Element {
     if (value) {
       setSelectedDate(value);
       const formatedDate = DateFormateMMMMDDYYY(value);
-      console.log(formatedDate, 'date');
       inputChangedHandler('DOJ', formatedDate);
     }
   };
@@ -187,56 +198,50 @@ function EditUser(this: any): React.JSX.Element {
     let userImgIsValid = true;
     let userImgMessage = '';
 
-    if (inputs.firstname.value.trim().length <= 0) {
+    if (firstname.value.trim().length <= 0) {
       firstnameIsValid = false;
       firstnameIsValidMsg = 'First Name is required.';
     }
-    if (inputs.lastname.value.trim().length <= 0) {
+    if (lastname.value.trim().length <= 0) {
       lastnameIsValid = false;
       lastnameMessage = 'Last Name is required.';
     }
 
-    if (inputs.email.value.trim().length <= 0) {
+    if (email.value.trim().length <= 0) {
       emailMessage = 'Email Is Required.';
       emailIsValid = false;
-    } else if (
-      inputs.email.value.trim().length > 0 &&
-      !reg.test(inputs.email.value)
-    ) {
+    } else if (email.value.trim().length > 0 && !reg.test(email.value)) {
       emailMessage = 'Invalid Email.';
       emailIsValid = false;
     }
 
-    if (inputs.title.value.trim().length <= 0) {
+    if (title.value.trim().length <= 0) {
       titleIsValid = false;
       titleMessage = 'Title is required.';
     }
 
-    if (inputs.DOJ.value.trim().length <= 0) {
+    if (DOJ.value.trim().length <= 0) {
       DOJIsValid = false;
       DOJMessage = 'Date of Joining is required.';
     }
 
-    if (
-      inputs.mobileno.value.trim().length > 0 &&
-      !numbers.test(inputs.mobileno.value)
-    ) {
+    if (mobileno.value.trim().length > 0 && !numbers.test(mobileno.value)) {
       mobilenoMessage = 'Mobile no is invalid.';
       mobilenoIsValid = false;
-    } else if (inputs.mobileno.value.trim().length <= 0) {
+    } else if (mobileno.value.trim().length <= 0) {
       mobilenoMessage = 'Mobile no is required.';
       mobilenoIsValid = false;
     }
 
-    if (inputs.status.value.trim().length <= 0) {
+    if (status.value.trim().length <= 0) {
       statusIsValid = false;
       statusMessage = 'Status is required.';
     }
-    if (inputs.role.value.trim().length <= 0) {
+    if (role.value.trim().length <= 0) {
       roleIsValid = false;
       roleMessage = 'Role is required.';
     }
-    if (inputs.userImg.value.trim().length <= 0) {
+    if (userImg.value.trim().length <= 0) {
       userImgIsValid = false;
       userImgMessage = 'Upload Img is required.';
     }
@@ -327,57 +332,61 @@ function EditUser(this: any): React.JSX.Element {
 
         <View style={style.subContainer}>
           <View style={style.titleContainer}>
-            <Text style={style.titleContent}>Edit New User</Text>
+            <Text style={style.titleContent}>Edit User</Text>
           </View>
 
           <CustomInput
             textInputConfig={{
               placeholder: 'First Name',
-              onChangeText: inputChangedHandler.bind(this, 'firstname'),
-              value: inputs.firstname.value,
+              onChangeText: (value: any) =>
+                inputChangedHandler('firstname', value),
+              value: firstname.value,
             }}
-            isError={!inputs.firstname.isValid}
-            errorMsg={inputs.firstname.message}
+            isError={!firstname.isValid}
+            errorMsg={firstname.message}
           />
 
           <CustomInput
             textInputConfig={{
               placeholder: 'Last Name',
-              onChangeText: inputChangedHandler.bind(this, 'lastname'),
-              value: inputs.lastname.value,
+              onChangeText: (value: any) =>
+                inputChangedHandler('lastname', value),
+              value: lastname.value,
             }}
-            isError={!inputs.lastname.isValid}
-            errorMsg={inputs.lastname.message}
+            isError={!lastname.isValid}
+            errorMsg={lastname.message}
           />
 
           <CustomInput
             textInputConfig={{
               placeholder: 'Email',
-              onChangeText: inputChangedHandler.bind(this, 'email'),
-              value: inputs.email.value,
+              onChangeText: (value: any) => inputChangedHandler('email', value),
+              value: email.value,
             }}
-            isError={!inputs.email.isValid}
-            errorMsg={inputs.email.message}
+            isError={!email.isValid}
+            errorMsg={email.message}
           />
 
           <CustomInput
             textInputConfig={{
               placeholder: 'Mobile Number',
-              onChangeText: inputChangedHandler.bind(this, 'mobileno'),
-              value: inputs.mobileno.value,
+              onChangeText: (value: any) =>
+                inputChangedHandler('mobileno', value),
+              value: mobileno.value,
+              keyboardType: 'phone-pad',
             }}
-            isError={!inputs.mobileno.isValid}
-            errorMsg={inputs.mobileno.message}
+            isError={!mobileno.isValid}
+            errorMsg={mobileno.message}
           />
 
           <CustomInput
             textInputConfig={{
               placeholder: 'Title',
-              onChangeText: inputChangedHandler.bind(this, 'title'),
-              value: inputs.title.value,
+              onChangeText: (value: any) => inputChangedHandler('title', value),
+              value: title.value,
             }}
-            isError={!inputs.title.isValid}
-            errorMsg={inputs.title.message}
+            isError={!title.isValid}
+            errorMsg={title.message}
           />
 
           <CustomInput
@@ -385,10 +394,10 @@ function EditUser(this: any): React.JSX.Element {
             disableInput={true}
             textInputConfig={{
               placeholder: 'Date of Joining',
-              value: inputs.DOJ.value,
+              value: DOJ.value,
             }}
-            isError={!inputs.DOJ.isValid}
-            errorMsg={inputs.DOJ.message}
+            isError={!DOJ.isValid}
+            errorMsg={DOJ.message}
             iconPressed={() => setShowDate(true)}>
             <Icon name="calendar" size={30} color="black" />
           </CustomInput>
@@ -396,9 +405,9 @@ function EditUser(this: any): React.JSX.Element {
           <CustomDropdown
             data={roleData}
             placeholder={'Role'}
-            value={inputs.role.value}
-            isError={!inputs.role.isValid}
-            errorMsg={inputs.role.message}
+            value={role.value}
+            isError={!role.isValid}
+            errorMsg={role.message}
             onChange={onChangeRole}
           />
 
@@ -407,17 +416,17 @@ function EditUser(this: any): React.JSX.Element {
             disableInput={true}
             textInputConfig={{value: fileName, placeholder: 'Upload Img'}}
             iconPressed={() => onImageGalleryClick()}
-            isError={!inputs.userImg.isValid}
-            errorMsg={inputs.userImg.message}>
+            isError={!userImg.isValid}
+            errorMsg={userImg.message}>
             <Icon name="upload" size={30} color="black" />
           </CustomInput>
 
           <CustomDropdown
             data={statusData}
             placeholder={'Status'}
-            value={inputs.status.value}
-            isError={!inputs.status.isValid}
-            errorMsg={inputs.status.message}
+            value={status.value}
+            isError={!status.isValid}
+            errorMsg={status.message}
             onChange={onChangeStatus}
           />
           <CustomButton onPressBtn={() => checkValidation()}>Save</CustomButton>

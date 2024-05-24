@@ -2,7 +2,7 @@ import React from 'react';
 import {StyleSheet, View, TouchableOpacity, Text} from 'react-native';
 import {MultiSelect} from 'react-native-element-dropdown';
 import Icon from 'react-native-vector-icons/AntDesign';
-import colors from '../../helper/colors';
+import colors from '../../config/colors';
 import {HelperText} from 'react-native-paper';
 
 interface Option {
@@ -15,6 +15,8 @@ interface Props {
   selected: string[];
   placeholder: string;
   onChange: (selected: any[]) => void;
+  isError: boolean;
+  errorMsg: any;
 }
 
 const CustomDropdownMultiSelect: React.FC<Props> = ({
@@ -22,6 +24,8 @@ const CustomDropdownMultiSelect: React.FC<Props> = ({
   selected,
   placeholder,
   onChange,
+  isError,
+  errorMsg,
 }) => {
   const renderItem = (item: {label: any}) => {
     return (
@@ -62,10 +66,10 @@ const CustomDropdownMultiSelect: React.FC<Props> = ({
           }}
         />
       </View>
-      {true && (
-        <View style={{marginTop: -20, marginLeft: 16}}>
-          <HelperText type="error" visible={true}>
-            {'heelelelel'}
+      {isError && (
+        <View style={styles.errorContainer}>
+          <HelperText style={styles.errorText} type="error" visible={true}>
+            {errorMsg}
           </HelperText>
         </View>
       )}
@@ -97,11 +101,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
   },
-  icon: {
-    marginRight: 5,
-  },
   item: {
-    // padding: 17,
     paddingVertical: 12,
     paddingHorizontal: 15,
     borderBottomColor: colors.secondaryDark,
@@ -135,6 +135,14 @@ const styles = StyleSheet.create({
     shadowRadius: 1.41,
     elevation: 2,
     borderRadius: 14,
-    // marginBottom: 20,
+  },
+  errorContainer: {
+    marginTop: -20,
+    marginLeft: 16,
+    marginBottom: 4,
+  },
+  errorText: {
+    fontSize: 13,
+    fontWeight: '700',
   },
 });

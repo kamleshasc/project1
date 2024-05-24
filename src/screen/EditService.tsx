@@ -47,7 +47,7 @@ const employeeData = [
   {label: 'Ravi', value: 'Ravi'},
 ];
 
-function AddService() {
+function EditService({}) {
   const [inputs, setInputs] = React.useState({
     service: {
       value: '',
@@ -217,7 +217,7 @@ function AddService() {
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.subContainer}>
           <View style={styles.headerContainer}>
-            <Text style={styles.headerText}>Add New Service</Text>
+            <Text style={styles.headerText}>Edit Service</Text>
           </View>
 
           <CustomInput
@@ -277,7 +277,7 @@ function AddService() {
             value={site.value}
             isError={!site.isValid}
             errorMsg={site.message}
-            onChange={value => inputChangedHandler('site', value.value)}
+            onChange={(value: any) => inputChangedHandler('site', value.value)}
           />
 
           <CustomDropdown
@@ -286,7 +286,9 @@ function AddService() {
             value={status.value}
             isError={!status.isValid}
             errorMsg={status.message}
-            onChange={value => inputChangedHandler('status', value.value)}
+            onChange={(value: any) =>
+              inputChangedHandler('status', value.value)
+            }
           />
 
           <CustomDropdownMultiSelect
@@ -299,7 +301,7 @@ function AddService() {
           />
 
           <View style={styles.btnContainer}>
-            <CustomButton onPressBtn={validationCheck}>Add</CustomButton>
+            <CustomButton onPressBtn={validationCheck}>Save</CustomButton>
           </View>
         </View>
       </ScrollView>
@@ -307,7 +309,7 @@ function AddService() {
   );
 }
 
-export default AddService;
+export default EditService;
 
 const styles = StyleSheet.create({
   container: {
