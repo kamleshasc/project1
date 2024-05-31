@@ -81,6 +81,7 @@ const style = StyleSheet.create({
   },
   selectedTextStyle: {
     fontSize: 16,
+    color:colors.fontDark
   },
   iconStyle: {
     width: 40,

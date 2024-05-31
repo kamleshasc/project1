@@ -1,6 +1,6 @@
 import {createSlice} from '@reduxjs/toolkit';
 import type {PayloadAction} from '@reduxjs/toolkit';
-import {fetchGetUser} from '../Action/userAction';
+import {fetchGetUser} from '../../Action/userAction';
 
 export interface UserState {
   data: any[];
@@ -19,12 +19,20 @@ const initialState: UserState = {
 export const getUserSlice = createSlice({
   name: 'getUser',
   initialState,
-  reducers: {},
+  reducers: {
+    clearUserData: state => {
+      state.data = [];
+      state.isError = false;
+      state.errorMsg = '';
+    },
+  },
   extraReducers: builder => {
     builder
       .addCase(fetchGetUser.pending, state => {
         state.isLoader = true;
         state.data = [];
+        state.isError = false;
+        state.errorMsg = '';
       })
       .addCase(
         fetchGetUser.fulfilled,
@@ -44,4 +52,5 @@ export const getUserSlice = createSlice({
 // Action creators are generated for each case reducer function
 // export const {increment, decrement, incrementByAmount} = counterSlice.actions;
 
+export const {clearUserData} = getUserSlice.actions;
 export default getUserSlice.reducer;

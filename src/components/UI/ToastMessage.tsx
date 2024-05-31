@@ -22,7 +22,7 @@ function ToastMessage({
     barStyles.push(styles.errorStyle);
   }
   return (
-    <View style={{position: 'absolute', bottom: '4%', width: '100%'}}>
+    <View style={styles.msgContainer}>
       <Snackbar
         visible={visible}
         onDismiss={onDismissSnackBar}
@@ -39,6 +39,11 @@ function ToastMessage({
 export default ToastMessage;
 
 const styles = StyleSheet.create({
+  msgContainer: {
+    position: 'absolute',
+    bottom: '4%',
+    width: '100%',
+  },
   errorStyle: {
     backgroundColor: 'red',
   },

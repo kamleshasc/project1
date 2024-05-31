@@ -7,7 +7,6 @@ import CustomButton from '../components/UI/CustomButton';
 import {rMS} from '../config/responsive';
 import DatePickerUI from '../components/UI/DatePickerUI';
 import CustomDropdown from '../components/UI/CustomDropdown';
-import {DateFormateMMMMDDYYY} from '../config/dateFormater';
 import {
   launchImageLibrary,
   ImageLibraryOptions,
@@ -16,6 +15,7 @@ import {
 import ToastMessage from '../components/UI/ToastMessage';
 import {useSelector} from 'react-redux';
 import {RootState} from '../redux/store';
+import {DateFormateMMMMDDYYY} from '../config/helper';
 
 const roleData = [
   {label: 'Super User', value: 'Super User'},
@@ -28,7 +28,7 @@ const statusData = [
   {label: 'Deactive', value: 'Deactive'},
 ];
 
-function AddUser(this: any): React.JSX.Element {
+function AddUser(): React.JSX.Element {
   const [selectedDate, setSelectedDate] = React.useState(new Date());
   const [inputs, setInputs] = React.useState({
     firstname: {
@@ -86,7 +86,7 @@ function AddUser(this: any): React.JSX.Element {
     /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|international|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i;
   let numbers = /^\d+$/;
 
-  const {value} = useSelector((state: RootState) => state.user);
+  const {data} = useSelector((state: RootState) => state.user.getUser);
 
   const handleDateChange = (value: Date) => {
     setShowDate(false);
@@ -336,7 +336,8 @@ function AddUser(this: any): React.JSX.Element {
           <CustomInput
             textInputConfig={{
               placeholder: 'First Name',
-              onChangeText: inputChangedHandler.bind(this, 'firstname'),
+              onChangeText: (value: any) =>
+                inputChangedHandler('firstname', value),
               value: inputs.firstname.value,
             }}
             isError={!inputs.firstname.isValid}
@@ -346,7 +347,8 @@ function AddUser(this: any): React.JSX.Element {
           <CustomInput
             textInputConfig={{
               placeholder: 'Last Name',
-              onChangeText: inputChangedHandler.bind(this, 'lastname'),
+              onChangeText: (value: any) =>
+                inputChangedHandler('lastname', value),
               value: inputs.lastname.value,
             }}
             isError={!inputs.lastname.isValid}
@@ -356,7 +358,7 @@ function AddUser(this: any): React.JSX.Element {
           <CustomInput
             textInputConfig={{
               placeholder: 'Email',
-              onChangeText: inputChangedHandler.bind(this, 'email'),
+              onChangeText: (value: any) => inputChangedHandler('email', value),
               value: inputs.email.value,
             }}
             isError={!inputs.email.isValid}
@@ -366,7 +368,8 @@ function AddUser(this: any): React.JSX.Element {
           <CustomInput
             textInputConfig={{
               placeholder: 'Mobile Number',
-              onChangeText: inputChangedHandler.bind(this, 'mobileno'),
+              onChangeText: (value: any) =>
+                inputChangedHandler('mobileno', value),
               value: inputs.mobileno.value,
             }}
             isError={!inputs.mobileno.isValid}
@@ -376,7 +379,7 @@ function AddUser(this: any): React.JSX.Element {
           <CustomInput
             textInputConfig={{
               placeholder: 'Title',
-              onChangeText: inputChangedHandler.bind(this, 'title'),
+              onChangeText: (value: any) => inputChangedHandler('title', value),
               value: inputs.title.value,
             }}
             isError={!inputs.title.isValid}

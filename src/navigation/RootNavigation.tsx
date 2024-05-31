@@ -9,11 +9,12 @@ import EditUser from '../screen/EditUser';
 import colors from '../config/colors';
 import AddService from '../screen/AddService';
 import EditService from '../screen/EditService';
+import {UserData} from '../screen/Users';
 
 export type RootStackParamList = {
   DrawerNavigation: undefined;
   AddUser: undefined;
-  EditUser: undefined;
+  EditUser: {user: UserData};
   AddService: undefined;
   EditService: undefined;
 };

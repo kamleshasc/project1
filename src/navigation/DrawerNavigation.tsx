@@ -22,7 +22,8 @@ export type DrawerNavigationParamList = {
   Inventory: undefined;
 };
 
-export type DrawerNavigationPropList = DrawerNavigationProp<DrawerNavigationParamList>;
+export type DrawerNavigationPropList =
+  DrawerNavigationProp<DrawerNavigationParamList>;
 
 const Drawer = createDrawerNavigator<DrawerNavigationParamList>();
 

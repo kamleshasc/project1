@@ -1,9 +1,7 @@
 import axios, {AxiosError, AxiosResponse} from 'axios';
 // import {BASE_URL} from '@env';
 
-const BASE_URL = 'https://jsonplaceholder.typicode.com/';
-
-console.log(BASE_URL, 'BASE_URL');
+const BASE_URL = 'http://192.168.1.42:3200/api';
 
 interface ApiProps {
   url: string;

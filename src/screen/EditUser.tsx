@@ -7,13 +7,21 @@ import CustomButton from '../components/UI/CustomButton';
 import {rMS} from '../config/responsive';
 import DatePickerUI from '../components/UI/DatePickerUI';
 import CustomDropdown from '../components/UI/CustomDropdown';
-import {DateFormateMMMMDDYYY} from '../config/dateFormater';
 import {
   launchImageLibrary,
   ImageLibraryOptions,
   ImagePickerResponse,
 } from 'react-native-image-picker';
 import ToastMessage from '../components/UI/ToastMessage';
+import {RootStackParamList} from '../navigation/RootNavigation';
+import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native-stack/types';
+import {
+  DateFormateMMMMDDYYY,
+  deformatMobileNumber,
+  formatMobileNumber,
+} from '../config/helper';
+import {useAppDispatch, useAppSelector} from '../hooks/storeHook';
+import {fetchGetUser, fetchUpdateUser} from '../redux/Action/userAction';
 
 const roleData = [
   {label: 'Super User', value: 'Super User'},
@@ -26,55 +34,42 @@ const statusData = [
   {label: 'Deactive', value: 'Deactive'},
 ];
 
-function EditUser(): React.JSX.Element {
+interface objValues {
+  value: any;
+  isValid: boolean;
+  message: any;
+}
+
+interface userInputsTypes {
+  firstName: objValues;
+  lastName: objValues;
+  email: objValues;
+  title: objValues;
+  role: objValues;
+  mobileNumber: objValues;
+  dateOfjoining: objValues;
+  status: objValues;
+  userImg: objValues;
+}
+
+const initialInputs: userInputsTypes = {
+  firstName: {value: '', isValid: true, message: ''},
+  lastName: {value: '', isValid: true, message: ''},
+  email: {value: '', isValid: true, message: ''},
+  title: {value: '', isValid: true, message: ''},
+  role: {value: '', isValid: true, message: ''},
+  mobileNumber: {value: '', isValid: true, message: ''},
+  dateOfjoining: {value: '', isValid: true, message: ''},
+  status: {value: '', isValid: true, message: ''},
+  userImg: {value: '', isValid: true, message: ''},
+};
+
+type Props = NativeStackScreenProps<RootStackParamList, 'EditUser'>;
+
+function EditUser({route, navigation}: Props): React.JSX.Element {
+  const {user} = route.params;
   const [selectedDate, setSelectedDate] = React.useState(new Date());
-  const [inputs, setInputs] = React.useState({
-    firstname: {
-      value: '',
-      isValid: true,
-      message: '',
-    },
-    lastname: {
-      value: '',
-      isValid: true,
-      message: '',
-    },
-    email: {
-      value: '',
-      isValid: true,
-      message: '',
-    },
-    title: {
-      value: '',
-      isValid: true,
-      message: '',
-    },
-    mobileno: {
-      value: '',
-      isValid: true,
-      message: '',
-    },
-    DOJ: {
-      value: '',
-      isValid: true,
-      message: '',
-    },
-    status: {
-      value: '',
-      isValid: true,
-      message: '',
-    },
-    userImg: {
-      value: '',
-      isValid: true,
-      message: '',
-    },
-    role: {
-      value: '',
-      isValid: true,
-      message: '',
-    },
-  });
+  const [inputs, setInputs] = React.useState<userInputsTypes>(initialInputs);
   const [showDate, setShowDate] = React.useState(false);
   const [formValue, setFormValue] = React.useState<any>();
   const [fileName, setFileName] = React.useState('');
@@ -83,18 +78,34 @@ function EditUser(): React.JSX.Element {
   const reg =
     /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|international|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i;
   let numbers = /^\d+$/;
+  const dispatch = useAppDispatch();
+  const {errorMsg, isError, isLoader} = useAppSelector(
+    state => state.user.updateUser,
+  );
 
   const {
-    firstname,
-    lastname,
+    firstName,
+    lastName,
     email,
-    mobileno,
+    mobileNumber,
     title,
-    DOJ,
+    dateOfjoining,
     role,
     status,
     userImg,
   } = inputs;
+
+  const fieldsKeys = [
+    'firstName',
+    'lastName',
+    'email',
+    'mobileNumber',
+    'title',
+    'dateOfjoining',
+    'role',
+    'status',
+    'userImg',
+  ];
 
   function inputChangedHandler(inputIdentifier: any, enteredValue: any): void {
     try {
@@ -178,6 +189,27 @@ function EditUser(): React.JSX.Element {
     }
   };
 
+  const updateUserDetails = () => {
+    let userId = user._id;
+    const payload = {
+      firstName: firstName.value,
+      lastName: lastName.value,
+      email: email.value,
+      title: title.value,
+      mobileNumber: deformatMobileNumber(mobileNumber.value),
+      dateOfjoining: dateOfjoining.value,
+      status: status.value,
+      role: role.value,
+    };
+    dispatch(fetchUpdateUser({userId, payload}));
+    setTimeout(() => {
+      if (!isLoader && !isError) {
+        navigation.goBack();
+        dispatch(fetchGetUser());
+      }
+    }, 200);
+  };
+
   const checkValidation = () => {
     let firstnameIsValid = true;
     let firstnameIsValidMsg = '';
@@ -195,14 +227,14 @@ function EditUser(): React.JSX.Element {
     let statusMessage = '';
     let roleIsValid = true;
     let roleMessage = '';
-    let userImgIsValid = true;
-    let userImgMessage = '';
+    // let userImgIsValid = true;
+    // let userImgMessage = '';
 
-    if (firstname.value.trim().length <= 0) {
+    if (firstName.value.trim().length <= 0) {
       firstnameIsValid = false;
       firstnameIsValidMsg = 'First Name is required.';
     }
-    if (lastname.value.trim().length <= 0) {
+    if (lastName.value.trim().length <= 0) {
       lastnameIsValid = false;
       lastnameMessage = 'Last Name is required.';
     }
@@ -220,16 +252,22 @@ function EditUser(): React.JSX.Element {
       titleMessage = 'Title is required.';
     }
 
-    if (DOJ.value.trim().length <= 0) {
+    if (dateOfjoining.value.trim().length <= 0) {
       DOJIsValid = false;
       DOJMessage = 'Date of Joining is required.';
     }
 
-    if (mobileno.value.trim().length > 0 && !numbers.test(mobileno.value)) {
-      mobilenoMessage = 'Mobile no is invalid.';
+    if (
+      mobileNumber.value.trim().length > 0 &&
+      !numbers.test(mobileNumber.value)
+    ) {
+      mobilenoMessage = 'Mobile No. is invalid.';
       mobilenoIsValid = false;
-    } else if (mobileno.value.trim().length <= 0) {
-      mobilenoMessage = 'Mobile no is required.';
+    } else if (mobileNumber.value.trim().length <= 0) {
+      mobilenoMessage = 'Mobile No. is required.';
+      mobilenoIsValid = false;
+    } else if (mobileNumber.value.trim().length < 10) {
+      mobilenoMessage = 'Mobile No. must have 10 digits.';
       mobilenoIsValid = false;
     }
 
@@ -241,10 +279,10 @@ function EditUser(): React.JSX.Element {
       roleIsValid = false;
       roleMessage = 'Role is required.';
     }
-    if (userImg.value.trim().length <= 0) {
-      userImgIsValid = false;
-      userImgMessage = 'Upload Img is required.';
-    }
+    // if (userImg.value.trim().length <= 0) {
+    //   userImgIsValid = false;
+    //   userImgMessage = 'Upload Img is required.';
+    // }
 
     if (
       !firstnameIsValid ||
@@ -254,21 +292,21 @@ function EditUser(): React.JSX.Element {
       !mobilenoIsValid ||
       !DOJIsValid ||
       !statusIsValid ||
-      !userImgIsValid ||
+      // !userImgIsValid ||
       !roleIsValid
     ) {
       setInputs(curInputs => {
         return {
           ...curInputs,
-          firstname: {
+          firstName: {
             message: firstnameIsValidMsg,
-            value: curInputs.firstname.value,
+            value: curInputs.firstName.value,
             isValid: firstnameIsValid,
           },
-          lastname: {
+          lastName: {
             message: lastnameMessage,
-            value: curInputs.firstname.value,
-            isValid: firstnameIsValid,
+            value: curInputs.lastName.value,
+            isValid: lastnameIsValid,
           },
           email: {
             message: emailMessage,
@@ -280,14 +318,14 @@ function EditUser(): React.JSX.Element {
             value: curInputs.title.value,
             isValid: titleIsValid,
           },
-          mobileno: {
+          mobileNumber: {
             message: mobilenoMessage,
-            value: curInputs.mobileno.value,
+            value: curInputs.mobileNumber.value,
             isValid: mobilenoIsValid,
           },
-          DOJ: {
+          dateOfjoining: {
             message: DOJMessage,
-            value: curInputs.DOJ.value,
+            value: curInputs.dateOfjoining.value,
             isValid: DOJIsValid,
           },
           status: {
@@ -297,18 +335,19 @@ function EditUser(): React.JSX.Element {
           },
           role: {
             message: roleMessage,
-            value: curInputs.DOJ.value,
+            value: curInputs.role.value,
             isValid: DOJIsValid,
           },
-          userImg: {
-            message: userImgMessage,
-            value: curInputs.userImg.value,
-            isValid: userImgIsValid,
-          },
+          // userImg: {
+          //   message: userImgMessage,
+          //   value: curInputs.userImg.value,
+          //   isValid: userImgIsValid,
+          // },
         };
       });
       return;
     }
+    updateUserDetails();
   };
 
   const onChangeRole = (value: {value: any}) => {
@@ -318,6 +357,28 @@ function EditUser(): React.JSX.Element {
   const onChangeStatus = (value: {value: any}) => {
     inputChangedHandler('status', value.value);
   };
+
+  const fetchUserDetails = (user: any) => {
+    let keys = Object.keys(user).filter(x => fieldsKeys.indexOf(x) > -1);
+    for (let key of keys) {
+      if (key == 'mobileNumber') {
+        inputChangedHandler(key, formatMobileNumber(user[key]) || '');
+        return;
+      }
+      inputChangedHandler(key, user[key] || '');
+    }
+  };
+
+  React.useEffect(() => {
+    fetchUserDetails(user);
+  }, []);
+
+  React.useEffect(() => {
+    if (isError && !showMessage) {
+      setShowMessage(isError);
+      setMessage(errorMsg);
+    }
+  }, [isLoader]);
 
   return (
     <SafeAreaView style={style.container}>
@@ -339,22 +400,22 @@ function EditUser(): React.JSX.Element {
             textInputConfig={{
               placeholder: 'First Name',
               onChangeText: (value: any) =>
-                inputChangedHandler('firstname', value),
-              value: firstname.value,
+                inputChangedHandler('firstName', value),
+              value: firstName.value,
             }}
-            isError={!firstname.isValid}
-            errorMsg={firstname.message}
+            isError={!firstName.isValid}
+            errorMsg={firstName.message}
           />
 
           <CustomInput
             textInputConfig={{
               placeholder: 'Last Name',
               onChangeText: (value: any) =>
-                inputChangedHandler('lastname', value),
-              value: lastname.value,
+                inputChangedHandler('lastName', value),
+              value: lastName.value,
             }}
-            isError={!lastname.isValid}
-            errorMsg={lastname.message}
+            isError={!lastName.isValid}
+            errorMsg={lastName.message}
           />
 
           <CustomInput
@@ -371,12 +432,12 @@ function EditUser(): React.JSX.Element {
             textInputConfig={{
               placeholder: 'Mobile Number',
               onChangeText: (value: any) =>
-                inputChangedHandler('mobileno', value),
-              value: mobileno.value,
+                inputChangedHandler('mobileNumber', value),
+              value: mobileNumber.value,
               keyboardType: 'phone-pad',
             }}
-            isError={!mobileno.isValid}
-            errorMsg={mobileno.message}
+            isError={!mobileNumber.isValid}
+            errorMsg={mobileNumber.message}
           />
 
           <CustomInput
@@ -394,10 +455,10 @@ function EditUser(): React.JSX.Element {
             disableInput={true}
             textInputConfig={{
               placeholder: 'Date of Joining',
-              value: DOJ.value,
+              value: dateOfjoining.value,
             }}
-            isError={!DOJ.isValid}
-            errorMsg={DOJ.message}
+            isError={!dateOfjoining.isValid}
+            errorMsg={dateOfjoining.message}
             iconPressed={() => setShowDate(true)}>
             <Icon name="calendar" size={30} color="black" />
           </CustomInput>
@@ -429,7 +490,11 @@ function EditUser(): React.JSX.Element {
             errorMsg={status.message}
             onChange={onChangeStatus}
           />
-          <CustomButton onPressBtn={() => checkValidation()}>Save</CustomButton>
+          <CustomButton
+            disabledBtn={isLoader}
+            onPressBtn={() => checkValidation()}>
+            Save
+          </CustomButton>
         </View>
       </ScrollView>
       <ToastMessage
