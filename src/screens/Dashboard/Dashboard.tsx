@@ -1,6 +1,6 @@
 import React from 'react';
 import {SafeAreaView, StyleSheet, Text} from 'react-native';
-import colors from '../config/colors';
+import colors from '../../config/colors';
 
 function Dashboard(): React.JSX.Element {
   return (

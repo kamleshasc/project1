@@ -1,21 +1,32 @@
 import React from 'react';
-import {SafeAreaView, ScrollView, StyleSheet, Text, View} from 'react-native';
-import colors from '../config/colors';
-import CustomInput from '../components/UI/CustomInput';
+import {
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import colors from '../../config/colors';
 import Icon from 'react-native-vector-icons/AntDesign';
-import CustomButton from '../components/UI/CustomButton';
-import {rMS} from '../config/responsive';
-import DatePickerUI from '../components/UI/DatePickerUI';
-import CustomDropdown from '../components/UI/CustomDropdown';
+import {rMS} from '../../config/responsive';
 import {
   launchImageLibrary,
   ImageLibraryOptions,
   ImagePickerResponse,
 } from 'react-native-image-picker';
-import ToastMessage from '../components/UI/ToastMessage';
 import {useSelector} from 'react-redux';
-import {RootState} from '../redux/store';
-import {DateFormateMMMMDDYYY} from '../config/helper';
+import {RootState} from '../../redux/store';
+import {DateFormateMMMMDDYYY, deformatMobileNumber} from '../../config/helper';
+import {useAppDispatch} from '../../hooks/storeHook';
+import {
+  fetchAddUser,
+  fetchGetUser,
+  uploadImg,
+} from '../../redux/Action/userAction';
+import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native-stack/types';
+import {RootStackParamList} from '../../navigation/RootNavigation';
+import {UI} from '../../components';
 
 const roleData = [
   {label: 'Super User', value: 'Super User'},
@@ -28,72 +39,79 @@ const statusData = [
   {label: 'Deactive', value: 'Deactive'},
 ];
 
-function AddUser(): React.JSX.Element {
+interface objValues {
+  value: any;
+  isValid: boolean;
+  message: any;
+}
+
+interface userInputsTypes {
+  firstName: objValues;
+  lastName: objValues;
+  email: objValues;
+  title: objValues;
+  role: objValues;
+  mobileNumber: objValues;
+  dateOfjoining: objValues;
+  status: objValues;
+  userImage: objValues;
+}
+
+const initialInputs: userInputsTypes = {
+  firstName: {value: '', isValid: true, message: ''},
+  lastName: {value: '', isValid: true, message: ''},
+  email: {value: '', isValid: true, message: ''},
+  title: {value: '', isValid: true, message: ''},
+  role: {value: '', isValid: true, message: ''},
+  mobileNumber: {value: '', isValid: true, message: ''},
+  dateOfjoining: {value: '', isValid: true, message: ''},
+  status: {value: '', isValid: true, message: ''},
+  userImage: {value: '', isValid: true, message: ''},
+};
+
+type Props = NativeStackScreenProps<RootStackParamList, 'AddUser'>;
+
+function AddUser({navigation}: Props): React.JSX.Element {
   const [selectedDate, setSelectedDate] = React.useState(new Date());
-  const [inputs, setInputs] = React.useState({
-    firstname: {
-      value: '',
-      isValid: true,
-      message: '',
-    },
-    lastname: {
-      value: '',
-      isValid: true,
-      message: '',
-    },
-    email: {
-      value: '',
-      isValid: true,
-      message: '',
-    },
-    title: {
-      value: '',
-      isValid: true,
-      message: '',
-    },
-    mobileno: {
-      value: '',
-      isValid: true,
-      message: '',
-    },
-    DOJ: {
-      value: '',
-      isValid: true,
-      message: '',
-    },
-    status: {
-      value: '',
-      isValid: true,
-      message: '',
-    },
-    userImg: {
-      value: '',
-      isValid: true,
-      message: '',
-    },
-    role: {
-      value: '',
-      isValid: true,
-      message: '',
-    },
-  });
+  const [inputs, setInputs] = React.useState<userInputsTypes>(initialInputs);
   const [showDate, setShowDate] = React.useState(false);
-  const [formValue, setFormValue] = React.useState<any>();
-  const [fileName, setFileName] = React.useState('');
   const [message, setMessage] = React.useState<any>('');
   const [showMessage, setShowMessage] = React.useState(false);
   const reg =
     /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|international|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i;
   let numbers = /^\d+$/;
 
-  const {data} = useSelector((state: RootState) => state.user.getUser);
+  const {isError, isLoader, errorMsg} = useSelector(
+    (state: RootState) => state.user.addUser,
+  );
+
+  const dispatchUser = useAppDispatch();
+
+  React.useEffect(() => {
+    if (!isLoader && isError) {
+      setShowMessage(isError);
+      setMessage(errorMsg);
+    }
+  }, [isLoader]);
+
+  const {
+    firstName,
+    lastName,
+    email,
+    title,
+    role,
+    mobileNumber,
+    dateOfjoining,
+    status,
+    userImage,
+  } = inputs;
 
   const handleDateChange = (value: Date) => {
     setShowDate(false);
     if (value) {
       setSelectedDate(value);
       const selectedDate = DateFormateMMMMDDYYY(value);
-      console.log(selectedDate, 'date');
+      inputChangedHandler('dateOfjoining', selectedDate);
     }
   };
 
@@ -109,6 +127,28 @@ function AddUser(): React.JSX.Element {
       console.log(error);
     }
   }
+
+  const userUploadImg = async (imgPath: any) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', {
+        uri:
+          Platform.OS === 'android'
+            ? imgPath.uri
+            : imgPath.uri.replace('file://', ''),
+        name: imgPath.fileName,
+        type: imgPath.type,
+      });
+
+      let result: any = await dispatchUser(uploadImg(formData)).unwrap();
+      if (result && result?.fileName) {
+        inputChangedHandler('userImage', result?.fileName || '');
+      }
+    } catch (error) {
+      setShowMessage(true);
+      setMessage(error);
+    }
+  };
 
   const onImageGalleryClick = () => {
     try {
@@ -136,23 +176,12 @@ function AddUser(): React.JSX.Element {
           return;
         }
         const responseResult = response.assets;
-
         if (!responseResult) {
           setShowMessage(true);
           setMessage('Image is not supported.');
           return;
         }
         const file = responseResult['0'];
-        const formData = new FormData();
-        formData.append('file', {
-          uri: file.uri,
-          // Platform.OS === 'android'
-          //   ? file.uri
-          //   : file.uri.replace('file://', ''),
-          type: file.type,
-          name: file.fileName,
-        });
-
         if (
           file.type !== 'image/jpeg' &&
           file.type !== 'image/jpg' &&
@@ -162,11 +191,36 @@ function AddUser(): React.JSX.Element {
           setMessage('Only .jpeg,.jpg and .png Format Are Supported ');
           return;
         }
-        setFileName(file.fileName ? file.fileName : '');
-        setFormValue(formData);
+        // inputChangedHandler('userImg', file.fileName ? file.fileName : '');
+        // setFormValue(file);
+        // setImgPath(file);
+        userUploadImg(file);
       });
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const addUser = async () => {
+    try {
+      let payload = {
+        firstName: firstName.value,
+        lastName: lastName.value,
+        email: email.value,
+        mobileNumber: deformatMobileNumber(mobileNumber.value),
+        title: title.value,
+        dateOfjoining: dateOfjoining.value,
+        role: role.value,
+        userImage: userImage.value,
+        status: status.value,
+      };
+
+      await dispatchUser(fetchAddUser(payload)).unwrap();
+      navigation.goBack();
+      dispatchUser(fetchGetUser());
+    } catch (error) {
+      setShowMessage(true);
+      setMessage(error);
     }
   };
 
@@ -190,56 +244,56 @@ function AddUser(): React.JSX.Element {
     let userImgIsValid = true;
     let userImgMessage = '';
 
-    if (inputs.firstname.value.trim().length <= 0) {
+    if (firstName.value.trim().length <= 0) {
       firstnameIsValid = false;
       firstnameIsValidMsg = 'First Name is required.';
     }
-    if (inputs.lastname.value.trim().length <= 0) {
+    if (firstName.value.trim().length <= 0) {
       lastnameIsValid = false;
       lastnameMessage = 'Last Name is required.';
     }
 
-    if (inputs.email.value.trim().length <= 0) {
+    if (email.value.trim().length <= 0) {
       emailMessage = 'Email Is Required.';
       emailIsValid = false;
-    } else if (
-      inputs.email.value.trim().length > 0 &&
-      !reg.test(inputs.email.value)
-    ) {
+    } else if (email.value.trim().length > 0 && !reg.test(email.value)) {
       emailMessage = 'Invalid Email.';
       emailIsValid = false;
     }
 
-    if (inputs.title.value.trim().length <= 0) {
+    if (title.value.trim().length <= 0) {
       titleIsValid = false;
       titleMessage = 'Title is required.';
     }
 
-    if (inputs.DOJ.value.trim().length <= 0) {
+    if (dateOfjoining.value.trim().length <= 0) {
       DOJIsValid = false;
       DOJMessage = 'Date of Joining is required.';
     }
 
     if (
-      inputs.mobileno.value.trim().length > 0 &&
-      !numbers.test(inputs.mobileno.value)
+      mobileNumber.value.trim().length > 0 &&
+      !numbers.test(mobileNumber.value)
     ) {
       mobilenoMessage = 'Mobile no is invalid.';
       mobilenoIsValid = false;
-    } else if (inputs.mobileno.value.trim().length <= 0) {
+    } else if (mobileNumber.value.trim().length <= 0) {
       mobilenoMessage = 'Mobile no is required.';
+      mobilenoIsValid = false;
+    } else if (mobileNumber.value.trim().length < 10) {
+      mobilenoMessage = 'Mobile No. must have 10 digits.';
       mobilenoIsValid = false;
     }
 
-    if (inputs.status.value.trim().length <= 0) {
+    if (status.value.trim().length <= 0) {
       statusIsValid = false;
       statusMessage = 'Status is required.';
     }
-    if (inputs.role.value.trim().length <= 0) {
+    if (role.value.trim().length <= 0) {
       roleIsValid = false;
       roleMessage = 'Role is required.';
     }
-    if (inputs.userImg.value.trim().length <= 0) {
+    if (userImage.value.trim().length <= 0) {
       userImgIsValid = false;
       userImgMessage = 'Upload Img is required.';
     }
@@ -258,15 +312,15 @@ function AddUser(): React.JSX.Element {
       setInputs(curInputs => {
         return {
           ...curInputs,
-          firstname: {
+          firstName: {
             message: firstnameIsValidMsg,
-            value: curInputs.firstname.value,
+            value: curInputs.firstName.value,
             isValid: firstnameIsValid,
           },
-          lastname: {
+          lastName: {
             message: lastnameMessage,
-            value: curInputs.firstname.value,
-            isValid: firstnameIsValid,
+            value: curInputs.lastName.value,
+            isValid: lastnameIsValid,
           },
           email: {
             message: emailMessage,
@@ -278,14 +332,14 @@ function AddUser(): React.JSX.Element {
             value: curInputs.title.value,
             isValid: titleIsValid,
           },
-          mobileno: {
+          mobileNumber: {
             message: mobilenoMessage,
-            value: curInputs.mobileno.value,
+            value: curInputs.mobileNumber.value,
             isValid: mobilenoIsValid,
           },
-          DOJ: {
+          dateOfjoining: {
             message: DOJMessage,
-            value: curInputs.DOJ.value,
+            value: curInputs.dateOfjoining.value,
             isValid: DOJIsValid,
           },
           status: {
@@ -295,18 +349,19 @@ function AddUser(): React.JSX.Element {
           },
           role: {
             message: roleMessage,
-            value: curInputs.DOJ.value,
+            value: curInputs.role.value,
             isValid: DOJIsValid,
           },
-          userImg: {
+          userImage: {
             message: userImgMessage,
-            value: curInputs.userImg.value,
+            value: curInputs.userImage.value,
             isValid: userImgIsValid,
           },
         };
       });
       return;
     }
+    addUser();
   };
 
   const onChangeRole = (value: {value: any}) => {
@@ -321,7 +376,7 @@ function AddUser(): React.JSX.Element {
     <SafeAreaView style={style.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {showDate && (
-          <DatePickerUI
+          <UI.DatePick
             dateValue={selectedDate}
             handleCancelPressed={() => setShowDate(false)}
             handleOkayPressed={(value: Date) => handleDateChange(value)}
@@ -333,105 +388,108 @@ function AddUser(): React.JSX.Element {
             <Text style={style.titleContent}>Add New User</Text>
           </View>
 
-          <CustomInput
+          <UI.Input
             textInputConfig={{
               placeholder: 'First Name',
               onChangeText: (value: any) =>
-                inputChangedHandler('firstname', value),
-              value: inputs.firstname.value,
+                inputChangedHandler('firstName', value),
+              value: firstName.value,
             }}
-            isError={!inputs.firstname.isValid}
-            errorMsg={inputs.firstname.message}
+            isError={!firstName.isValid}
+            errorMsg={firstName.message}
           />
 
-          <CustomInput
+          <UI.Input
             textInputConfig={{
               placeholder: 'Last Name',
               onChangeText: (value: any) =>
-                inputChangedHandler('lastname', value),
-              value: inputs.lastname.value,
+                inputChangedHandler('lastName', value),
+              value: lastName.value,
             }}
-            isError={!inputs.lastname.isValid}
-            errorMsg={inputs.lastname.message}
+            isError={!lastName.isValid}
+            errorMsg={lastName.message}
           />
 
-          <CustomInput
+          <UI.Input
             textInputConfig={{
               placeholder: 'Email',
               onChangeText: (value: any) => inputChangedHandler('email', value),
-              value: inputs.email.value,
+              value: email.value,
             }}
-            isError={!inputs.email.isValid}
-            errorMsg={inputs.email.message}
+            isError={!email.isValid}
+            errorMsg={email.message}
           />
 
-          <CustomInput
+          <UI.Input
             textInputConfig={{
               placeholder: 'Mobile Number',
               onChangeText: (value: any) =>
-                inputChangedHandler('mobileno', value),
-              value: inputs.mobileno.value,
+                inputChangedHandler('mobileNumber', value),
+              value: mobileNumber.value,
             }}
-            isError={!inputs.mobileno.isValid}
-            errorMsg={inputs.mobileno.message}
+            isError={!mobileNumber.isValid}
+            errorMsg={mobileNumber.message}
           />
 
-          <CustomInput
+          <UI.Input
             textInputConfig={{
               placeholder: 'Title',
               onChangeText: (value: any) => inputChangedHandler('title', value),
-              value: inputs.title.value,
+              value: title.value,
             }}
-            isError={!inputs.title.isValid}
-            errorMsg={inputs.title.message}
+            isError={!title.isValid}
+            errorMsg={title.message}
           />
 
-          <CustomInput
+          <UI.Input
             showIcon={true}
             disableInput={true}
             textInputConfig={{
               placeholder: 'Date of Joining',
-              value: inputs.DOJ.value,
+              value: dateOfjoining.value,
             }}
-            isError={!inputs.DOJ.isValid}
-            errorMsg={inputs.DOJ.message}
+            isError={!dateOfjoining.isValid}
+            errorMsg={dateOfjoining.message}
             iconPressed={() => setShowDate(true)}>
             <Icon name="calendar" size={30} color="black" />
-          </CustomInput>
+          </UI.Input>
 
-          <CustomDropdown
+          <UI.DropDown
             data={roleData}
             placeholder={'Role'}
-            value={inputs.role.value}
-            isError={!inputs.role.isValid}
-            errorMsg={inputs.role.message}
+            value={role.value}
+            isError={!role.isValid}
+            errorMsg={role.message}
             onChange={onChangeRole}
           />
 
-          <CustomInput
+          <UI.Input
             showIcon={true}
             disableInput={true}
-            textInputConfig={{value: fileName, placeholder: 'Upload Img'}}
+            textInputConfig={{
+              value: userImage.value,
+              placeholder: 'Upload Img',
+            }}
             iconPressed={() => onImageGalleryClick()}
-            isError={!inputs.userImg.isValid}
-            errorMsg={inputs.userImg.message}>
+            isError={!userImage.isValid}
+            errorMsg={userImage.message}>
             <Icon name="upload" size={30} color="black" />
-          </CustomInput>
+          </UI.Input>
 
-          <CustomDropdown
+          <UI.DropDown
             data={statusData}
             placeholder={'Status'}
-            value={inputs.status.value}
-            isError={!inputs.status.isValid}
-            errorMsg={inputs.status.message}
+            value={status.value}
+            isError={!status.isValid}
+            errorMsg={status.message}
             onChange={onChangeStatus}
           />
-          <CustomButton onPressBtn={() => checkValidation()}>
+          <UI.Btn disabledBtn={isLoader} onPressBtn={() => checkValidation()}>
             Submit
-          </CustomButton>
+          </UI.Btn>
         </View>
       </ScrollView>
-      <ToastMessage
+      <UI.Toast
         message={message}
         visible={showMessage}
         onDismissSnackBar={() => setShowMessage(false)}

@@ -1,7 +1,7 @@
 import axios, {AxiosError, AxiosResponse} from 'axios';
 // import {BASE_URL} from '@env';
 
-const BASE_URL = 'http://192.168.1.42:3200/api';
+const BASE_URL = 'http://192.168.1.69:3200/api';
 
 interface ApiProps {
   url: string;
@@ -36,19 +36,24 @@ export async function deleteData({url, config = ''}: ApiProps) {
       return response.data;
     })
     .catch(error => {
-      return error.response || error;
+      throw error;
     });
 }
 
-export async function put({url, body, config = ''}: ApiProps) {
-  let header = await getHeader(config);
+export async function put({
+  url,
+  body,
+  config = '',
+  hasFormData = false,
+}: ApiProps) {
+  let header = await getHeader({config, hasFormData});
   return await axios
     .put(BASE_URL + url, body, header)
     .then(response => {
       return response.data;
     })
     .catch(error => {
-      return error.response || error;
+      throw error;
     });
 }
 
@@ -65,7 +70,7 @@ export async function post({
       return response.data;
     })
     .catch(error => {
-      return error.response || error;
+      throw error;
     });
 }
 

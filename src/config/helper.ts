@@ -10,11 +10,15 @@ export const DateFormateMMMMDDYYY = (value: any) => {
   return formattedDate;
 };
 
-export const errorMsg = (error: any) => {
+export const errorMsgWrap = (error: any) => {
   let errorMessage = 'Unknown error occurred';
   if (axios.isAxiosError(error) && error.response) {
     errorMessage =
-      error.response.data.message || 'Error occurred while fetching user data';
+      'data' in error
+        ? (error.data as {message: string}).message
+        : error.message;
+    // (errorMessage =
+    //   error.response.data.message || 'Error occurred while fetching data');
   } else if (error instanceof Error) {
     errorMessage = error.message;
   }

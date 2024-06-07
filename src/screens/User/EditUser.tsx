@@ -1,27 +1,35 @@
 import React from 'react';
-import {SafeAreaView, ScrollView, StyleSheet, Text, View} from 'react-native';
-import colors from '../config/colors';
-import CustomInput from '../components/UI/CustomInput';
+import {
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import colors from '../../config/colors';
 import Icon from 'react-native-vector-icons/AntDesign';
-import CustomButton from '../components/UI/CustomButton';
-import {rMS} from '../config/responsive';
-import DatePickerUI from '../components/UI/DatePickerUI';
-import CustomDropdown from '../components/UI/CustomDropdown';
+import {rMS} from '../../config/responsive';
 import {
   launchImageLibrary,
   ImageLibraryOptions,
   ImagePickerResponse,
 } from 'react-native-image-picker';
-import ToastMessage from '../components/UI/ToastMessage';
-import {RootStackParamList} from '../navigation/RootNavigation';
+import {RootStackParamList} from '../../navigation/RootNavigation';
 import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native-stack/types';
 import {
   DateFormateMMMMDDYYY,
   deformatMobileNumber,
   formatMobileNumber,
-} from '../config/helper';
-import {useAppDispatch, useAppSelector} from '../hooks/storeHook';
-import {fetchGetUser, fetchUpdateUser} from '../redux/Action/userAction';
+} from '../../config/helper';
+import {useAppDispatch, useAppSelector} from '../../hooks/storeHook';
+import {
+  fetchGetUser,
+  fetchUpdateUser,
+  uploadImg,
+} from '../../redux/Action/userAction';
+import {RootState} from '../../redux/store';
+import {UI} from '../../components';
 
 const roleData = [
   {label: 'Super User', value: 'Super User'},
@@ -49,7 +57,7 @@ interface userInputsTypes {
   mobileNumber: objValues;
   dateOfjoining: objValues;
   status: objValues;
-  userImg: objValues;
+  userImage: objValues;
 }
 
 const initialInputs: userInputsTypes = {
@@ -61,7 +69,7 @@ const initialInputs: userInputsTypes = {
   mobileNumber: {value: '', isValid: true, message: ''},
   dateOfjoining: {value: '', isValid: true, message: ''},
   status: {value: '', isValid: true, message: ''},
-  userImg: {value: '', isValid: true, message: ''},
+  userImage: {value: '', isValid: true, message: ''},
 };
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EditUser'>;
@@ -71,18 +79,15 @@ function EditUser({route, navigation}: Props): React.JSX.Element {
   const [selectedDate, setSelectedDate] = React.useState(new Date());
   const [inputs, setInputs] = React.useState<userInputsTypes>(initialInputs);
   const [showDate, setShowDate] = React.useState(false);
-  const [formValue, setFormValue] = React.useState<any>();
-  const [fileName, setFileName] = React.useState('');
   const [message, setMessage] = React.useState<any>('');
   const [showMessage, setShowMessage] = React.useState(false);
   const reg =
     /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|international|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i;
   let numbers = /^\d+$/;
-  const dispatch = useAppDispatch();
+  const dispatchUserEdit = useAppDispatch();
   const {errorMsg, isError, isLoader} = useAppSelector(
-    state => state.user.updateUser,
+    (state: RootState) => state.user.updateUser,
   );
-
   const {
     firstName,
     lastName,
@@ -92,7 +97,7 @@ function EditUser({route, navigation}: Props): React.JSX.Element {
     dateOfjoining,
     role,
     status,
-    userImg,
+    userImage,
   } = inputs;
 
   const fieldsKeys = [
@@ -104,7 +109,7 @@ function EditUser({route, navigation}: Props): React.JSX.Element {
     'dateOfjoining',
     'role',
     'status',
-    'userImg',
+    'userImage',
   ];
 
   function inputChangedHandler(inputIdentifier: any, enteredValue: any): void {
@@ -126,6 +131,28 @@ function EditUser({route, navigation}: Props): React.JSX.Element {
       setSelectedDate(value);
       const formatedDate = DateFormateMMMMDDYYY(value);
       inputChangedHandler('DOJ', formatedDate);
+    }
+  };
+
+  const userUploadImg = async (value: any) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', {
+        uri:
+          Platform.OS === 'android'
+            ? value.uri
+            : value.uri.replace('file://', ''),
+        name: value.fileName,
+        type: value.type,
+      });
+
+      let result: any = await dispatchUserEdit(uploadImg(formData)).unwrap();
+      if (result && result?.fileName) {
+        inputChangedHandler('userImage', result?.fileName || '');
+      }
+    } catch (error) {
+      setShowMessage(true);
+      setMessage(error);
     }
   };
 
@@ -162,15 +189,6 @@ function EditUser({route, navigation}: Props): React.JSX.Element {
           return;
         }
         const file = responseResult['0'];
-        const formData = new FormData();
-        formData.append('file', {
-          uri: file.uri,
-          // Platform.OS === 'android'
-          //   ? file.uri
-          //   : file.uri.replace('file://', ''),
-          type: file.type,
-          name: file.fileName,
-        });
 
         if (
           file.type !== 'image/jpeg' &&
@@ -181,33 +199,34 @@ function EditUser({route, navigation}: Props): React.JSX.Element {
           setMessage('Only .jpeg,.jpg and .png Format Are Supported ');
           return;
         }
-        setFileName(file.fileName ? file.fileName : '');
-        setFormValue(formData);
+        userUploadImg(file);
       });
     } catch (error) {
       console.log(error);
     }
   };
 
-  const updateUserDetails = () => {
-    let userId = user._id;
-    const payload = {
-      firstName: firstName.value,
-      lastName: lastName.value,
-      email: email.value,
-      title: title.value,
-      mobileNumber: deformatMobileNumber(mobileNumber.value),
-      dateOfjoining: dateOfjoining.value,
-      status: status.value,
-      role: role.value,
-    };
-    dispatch(fetchUpdateUser({userId, payload}));
-    setTimeout(() => {
-      if (!isLoader && !isError) {
-        navigation.goBack();
-        dispatch(fetchGetUser());
-      }
-    }, 200);
+  const updateUserDetails = async () => {
+    try {
+      let userId = user._id;
+      let payload = {
+        firstName: firstName.value,
+        lastName: lastName.value,
+        email: email.value,
+        mobileNumber: deformatMobileNumber(mobileNumber.value),
+        title: title.value,
+        dateOfjoining: dateOfjoining.value,
+        role: role.value,
+        userImage: userImage.value,
+        status: status.value,
+      };
+      await dispatchUserEdit(fetchUpdateUser({userId, payload})).unwrap();
+      navigation.goBack();
+      dispatchUserEdit(fetchGetUser());
+    } catch (error) {
+      setShowMessage(true);
+      setMessage(error);
+    }
   };
 
   const checkValidation = () => {
@@ -227,8 +246,8 @@ function EditUser({route, navigation}: Props): React.JSX.Element {
     let statusMessage = '';
     let roleIsValid = true;
     let roleMessage = '';
-    // let userImgIsValid = true;
-    // let userImgMessage = '';
+    let userImgIsValid = true;
+    let userImgMessage = '';
 
     if (firstName.value.trim().length <= 0) {
       firstnameIsValid = false;
@@ -266,7 +285,10 @@ function EditUser({route, navigation}: Props): React.JSX.Element {
     } else if (mobileNumber.value.trim().length <= 0) {
       mobilenoMessage = 'Mobile No. is required.';
       mobilenoIsValid = false;
-    } else if (mobileNumber.value.trim().length < 10) {
+    } else if (
+      mobileNumber.value.trim().length > 10 ||
+      mobileNumber.value.trim().length < 10
+    ) {
       mobilenoMessage = 'Mobile No. must have 10 digits.';
       mobilenoIsValid = false;
     }
@@ -279,10 +301,10 @@ function EditUser({route, navigation}: Props): React.JSX.Element {
       roleIsValid = false;
       roleMessage = 'Role is required.';
     }
-    // if (userImg.value.trim().length <= 0) {
-    //   userImgIsValid = false;
-    //   userImgMessage = 'Upload Img is required.';
-    // }
+    if (userImage.value.trim().length <= 0) {
+      userImgIsValid = false;
+      userImgMessage = 'Upload Img is required.';
+    }
 
     if (
       !firstnameIsValid ||
@@ -292,7 +314,7 @@ function EditUser({route, navigation}: Props): React.JSX.Element {
       !mobilenoIsValid ||
       !DOJIsValid ||
       !statusIsValid ||
-      // !userImgIsValid ||
+      !userImgIsValid ||
       !roleIsValid
     ) {
       setInputs(curInputs => {
@@ -338,11 +360,11 @@ function EditUser({route, navigation}: Props): React.JSX.Element {
             value: curInputs.role.value,
             isValid: DOJIsValid,
           },
-          // userImg: {
-          //   message: userImgMessage,
-          //   value: curInputs.userImg.value,
-          //   isValid: userImgIsValid,
-          // },
+          userImage: {
+            message: userImgMessage,
+            value: curInputs.userImage.value,
+            isValid: userImgIsValid,
+          },
         };
       });
       return;
@@ -360,12 +382,13 @@ function EditUser({route, navigation}: Props): React.JSX.Element {
 
   const fetchUserDetails = (user: any) => {
     let keys = Object.keys(user).filter(x => fieldsKeys.indexOf(x) > -1);
+
     for (let key of keys) {
       if (key == 'mobileNumber') {
         inputChangedHandler(key, formatMobileNumber(user[key]) || '');
-        return;
+      } else {
+        inputChangedHandler(key, user[key] || '');
       }
-      inputChangedHandler(key, user[key] || '');
     }
   };
 
@@ -384,7 +407,7 @@ function EditUser({route, navigation}: Props): React.JSX.Element {
     <SafeAreaView style={style.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {showDate && (
-          <DatePickerUI
+          <UI.DatePick
             dateValue={selectedDate}
             handleCancelPressed={() => setShowDate(false)}
             handleOkayPressed={(value: Date) => handleDateChange(value)}
@@ -396,7 +419,7 @@ function EditUser({route, navigation}: Props): React.JSX.Element {
             <Text style={style.titleContent}>Edit User</Text>
           </View>
 
-          <CustomInput
+          <UI.Input
             textInputConfig={{
               placeholder: 'First Name',
               onChangeText: (value: any) =>
@@ -407,7 +430,7 @@ function EditUser({route, navigation}: Props): React.JSX.Element {
             errorMsg={firstName.message}
           />
 
-          <CustomInput
+          <UI.Input
             textInputConfig={{
               placeholder: 'Last Name',
               onChangeText: (value: any) =>
@@ -418,7 +441,7 @@ function EditUser({route, navigation}: Props): React.JSX.Element {
             errorMsg={lastName.message}
           />
 
-          <CustomInput
+          <UI.Input
             textInputConfig={{
               placeholder: 'Email',
               onChangeText: (value: any) => inputChangedHandler('email', value),
@@ -428,7 +451,7 @@ function EditUser({route, navigation}: Props): React.JSX.Element {
             errorMsg={email.message}
           />
 
-          <CustomInput
+          <UI.Input
             textInputConfig={{
               placeholder: 'Mobile Number',
               onChangeText: (value: any) =>
@@ -440,7 +463,7 @@ function EditUser({route, navigation}: Props): React.JSX.Element {
             errorMsg={mobileNumber.message}
           />
 
-          <CustomInput
+          <UI.Input
             textInputConfig={{
               placeholder: 'Title',
               onChangeText: (value: any) => inputChangedHandler('title', value),
@@ -450,7 +473,7 @@ function EditUser({route, navigation}: Props): React.JSX.Element {
             errorMsg={title.message}
           />
 
-          <CustomInput
+          <UI.Input
             showIcon={true}
             disableInput={true}
             textInputConfig={{
@@ -461,9 +484,9 @@ function EditUser({route, navigation}: Props): React.JSX.Element {
             errorMsg={dateOfjoining.message}
             iconPressed={() => setShowDate(true)}>
             <Icon name="calendar" size={30} color="black" />
-          </CustomInput>
+          </UI.Input>
 
-          <CustomDropdown
+          <UI.DropDown
             data={roleData}
             placeholder={'Role'}
             value={role.value}
@@ -472,17 +495,20 @@ function EditUser({route, navigation}: Props): React.JSX.Element {
             onChange={onChangeRole}
           />
 
-          <CustomInput
+          <UI.Input
             showIcon={true}
             disableInput={true}
-            textInputConfig={{value: fileName, placeholder: 'Upload Img'}}
+            textInputConfig={{
+              value: userImage.value,
+              placeholder: 'Upload Img',
+            }}
             iconPressed={() => onImageGalleryClick()}
-            isError={!userImg.isValid}
-            errorMsg={userImg.message}>
+            isError={!userImage.isValid}
+            errorMsg={userImage.message}>
             <Icon name="upload" size={30} color="black" />
-          </CustomInput>
+          </UI.Input>
 
-          <CustomDropdown
+          <UI.DropDown
             data={statusData}
             placeholder={'Status'}
             value={status.value}
@@ -490,14 +516,12 @@ function EditUser({route, navigation}: Props): React.JSX.Element {
             errorMsg={status.message}
             onChange={onChangeStatus}
           />
-          <CustomButton
-            disabledBtn={isLoader}
-            onPressBtn={() => checkValidation()}>
+          <UI.Btn disabledBtn={isLoader} onPressBtn={() => checkValidation()}>
             Save
-          </CustomButton>
+          </UI.Btn>
         </View>
       </ScrollView>
-      <ToastMessage
+      <UI.Toast
         message={message}
         visible={showMessage}
         onDismissSnackBar={() => setShowMessage(false)}

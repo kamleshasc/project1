@@ -8,24 +8,21 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import colors from '../config/colors';
+import colors from '../../config/colors';
 import Icon from 'react-native-vector-icons/AntDesign';
-import TableHeader from '../components/UI/TableHeader';
-import TableRow from '../components/UI/TableRow';
-import TableItem from '../components/UI/TableItem';
-import {RootStackParamList} from '../navigation/RootNavigation';
-import {fetchGetUser} from '../redux/Action/userAction';
-import {useAppDispatch, useAppSelector} from '../hooks/storeHook';
-import ToastMessage from '../components/UI/ToastMessage';
-import {DrawerNavigationParamList} from '../navigation/DrawerNavigation';
+import {RootStackParamList} from '../../navigation/RootNavigation';
+import {fetchGetUser} from '../../redux/Action/userAction';
+import {useAppDispatch, useAppSelector} from '../../hooks/storeHook';
+import {DrawerNavigationParamList} from '../../navigation/DrawerNavigation';
 import {CompositeScreenProps} from '@react-navigation/native';
 import {DrawerScreenProps} from '@react-navigation/drawer';
 import {StackScreenProps} from '@react-navigation/stack';
-import {DateFormateMMMMDDYYY, formatMobileNumber} from '../config/helper';
+import {DateFormateMMMMDDYYY, formatMobileNumber} from '../../config/helper';
+import {UI} from '../../components';
 
 export interface UserData {
   _id: string;
-  userImg: string;
+  userImage: string;
   firstName: string;
   lastName: string;
   title: string;
@@ -82,22 +79,22 @@ function Users({navigation}: Props) {
 
   function renderItem({item}: {item: UserData}) {
     return (
-      <TableRow
+      <UI.TableR
         onPress={() => {
           onPressUser(item);
         }}>
-        <TableItem ImgUrl={'kk'} />
-        <TableItem name={item.firstName} />
-        <TableItem name={item.lastName} />
-        <TableItem name={item.title} />
-        <TableItem name={formatMobileNumber(item.mobileNumber)} />
-        <TableItem name={item.email} />
-        <TableItem name={item.dateOfjoining} />
-        <TableItem name={DateFormateMMMMDDYYY(item.createdAt)} />
-        <TableItem name={DateFormateMMMMDDYYY(item.updatedAt)} />
-        <TableItem name={item.role} />
-        <TableItem name={item.status} />
-      </TableRow>
+        <UI.TableI ImgUrl={item.userImage} />
+        <UI.TableI name={item.firstName} />
+        <UI.TableI name={item.lastName} />
+        <UI.TableI name={item.title} />
+        <UI.TableI name={formatMobileNumber(item.mobileNumber)} />
+        <UI.TableI name={item.email} />
+        <UI.TableI name={item.dateOfjoining} />
+        <UI.TableI name={DateFormateMMMMDDYYY(item.createdAt)} />
+        <UI.TableI name={DateFormateMMMMDDYYY(item.updatedAt)} />
+        <UI.TableI name={item.role} />
+        <UI.TableI name={item.status} />
+      </UI.TableR>
     );
   }
 
@@ -110,7 +107,7 @@ function Users({navigation}: Props) {
           <RefreshControl refreshing={isLoader} onRefresh={getUserList} />
         }>
         <View style={style.fullScreen}>
-          <TableHeader
+          <UI.TableH
             headers={[
               'User Image',
               'First Name',
@@ -132,7 +129,7 @@ function Users({navigation}: Props) {
           />
         </View>
       </ScrollView>
-      <ToastMessage
+      <UI.Toast
         visible={showError}
         message={errorMsg}
         onDismissSnackBar={() => setShowError(false)}

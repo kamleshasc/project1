@@ -1,6 +1,6 @@
 import {createAsyncThunk} from '@reduxjs/toolkit';
-import {get, put} from '../../service/Apis';
-import {errorMsg} from '../../config/helper';
+import {get, post, put} from '../../service/Apis';
+import {errorMsgWrap} from '../../config/helper';
 
 export const fetchGetUser = createAsyncThunk(
   'getUser',
@@ -9,24 +9,27 @@ export const fetchGetUser = createAsyncThunk(
       const res = await get({url: '/users/getuser'});
       return res;
     } catch (error) {
-      let errorMessage = errorMsg(error);
+      let errorMessage = errorMsgWrap(error);
       return rejectWithValue(errorMessage);
     }
   },
 );
 
+interface userDetails {
+  firstName: string;
+  lastName: string;
+  email: string;
+  title: string;
+  role: string;
+  mobileNumber: object;
+  dateOfjoining: string;
+  status: string;
+  userImage: string;
+}
+
 interface UpdateUserParams {
   userId: string;
-  payload: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    title: string;
-    role: string;
-    mobileNumber?: string | object;
-    dateOfJoining?: string;
-    status?: string;
-  };
+  payload: userDetails;
 }
 
 export const fetchUpdateUser = createAsyncThunk(
@@ -39,7 +42,40 @@ export const fetchUpdateUser = createAsyncThunk(
       });
       return res;
     } catch (error) {
-      let errorMessage = errorMsg(error);
+      let errorMessage = errorMsgWrap(error);
+      return rejectWithValue(errorMessage);
+    }
+  },
+);
+
+export const fetchAddUser = createAsyncThunk(
+  'addUser',
+  async (payload: userDetails, {rejectWithValue}) => {
+    try {
+      const res = await post({
+        url: '/users/newuser',
+        body: payload,
+      });
+      return res;
+    } catch (error) {
+      let errorMessage = errorMsgWrap(error);
+      return rejectWithValue(errorMessage);
+    }
+  },
+);
+
+export const uploadImg = createAsyncThunk(
+  'uploadImg',
+  async (payload: FormData, {rejectWithValue}) => {
+    try {
+      const res = await post({
+        url: '/users/uploadImg',
+        body: payload,
+        hasFormData: true,
+      });
+      return res;
+    } catch (error) {
+      let errorMessage = errorMsgWrap(error);
       return rejectWithValue(errorMessage);
     }
   },

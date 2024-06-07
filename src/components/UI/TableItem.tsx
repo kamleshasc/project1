@@ -17,9 +17,7 @@ const TableItem: React.FC<TableItemProps> = ({name, ImgUrl, bunchData}) => {
           <Image
             style={styles.image}
             source={{
-              uri:
-                'https://images.pexels.com/photos/19153153/pexels-photo-19153153/free-photo-of-sea-dawn-landscape-nature.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' ||
-                ImgUrl,
+              uri: `http://192.168.1.69:3200/images/${ImgUrl}`,
             }}
           />
         </View>
@@ -40,7 +38,7 @@ const styles = StyleSheet.create({
     width: rS(81),
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight:60
+    minHeight: 60,
   },
   imageContainer: {
     height: 50,

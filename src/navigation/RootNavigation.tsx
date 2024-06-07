@@ -4,19 +4,17 @@ import {
   createStackNavigator,
 } from '@react-navigation/stack';
 import DrawerNavigation from './DrawerNavigation';
-import AddUser from '../screen/AddUser';
-import EditUser from '../screen/EditUser';
 import colors from '../config/colors';
-import AddService from '../screen/AddService';
-import EditService from '../screen/EditService';
-import {UserData} from '../screen/Users';
+import {UserData} from '../screens/User/Users';
+import {ServiceData} from '../screens/Service/Services';
+import SCREENS from '../screens';
 
 export type RootStackParamList = {
   DrawerNavigation: undefined;
   AddUser: undefined;
   EditUser: {user: UserData};
   AddService: undefined;
-  EditService: undefined;
+  EditService: {service: ServiceData};
 };
 
 export type RootStackNavigationProp = StackNavigationProp<RootStackParamList>;
@@ -39,22 +37,22 @@ function RootNavigation() {
       <Stack.Screen name="DrawerNavigation" component={DrawerNavigation} />
       <Stack.Screen
         name="AddUser"
-        component={AddUser}
+        component={SCREENS.USER.addUser}
         options={{headerShown: true}}
       />
       <Stack.Screen
         name="EditUser"
-        component={EditUser}
+        component={SCREENS.USER.editUser}
         options={{headerShown: true}}
       />
       <Stack.Screen
         name="AddService"
-        component={AddService}
+        component={SCREENS.SERVICE.addService}
         options={{headerShown: true}}
       />
       <Stack.Screen
         name="EditService"
-        component={EditService}
+        component={SCREENS.SERVICE.editService}
         options={{headerShown: true}}
       />
     </Stack.Navigator>

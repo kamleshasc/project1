@@ -4,18 +4,18 @@ import {
   StyleSheet,
   Text,
 } from 'react-native';
-import colors from '../config/colors';
+import colors from '../../config/colors';
 
-function Packages(): React.JSX.Element {
+function Clients(): React.JSX.Element {
 
   return (
     <SafeAreaView style={style.container}>
-        <Text style={{color:colors.fontDark}}>Packages</Text>
+        <Text style={{color:colors.fontDark}}>Clients</Text>
     </SafeAreaView>
   );
 }
 
-export default Packages;
+export default Clients;
 
 const style = StyleSheet.create({
     container: {
