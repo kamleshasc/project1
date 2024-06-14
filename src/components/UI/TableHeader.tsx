@@ -22,16 +22,15 @@ const TableHeader: React.FC<TableHeaderProps> = ({headers}) => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: colors.secondary,
   },
   header: {
-    width: rS(81),
+    width: rS(83),
     paddingVertical: rMS(8),
-    paddingHorizontal: rMS(4),
+    paddingHorizontal: rMS(8),
     minHeight: 60,
-    justifyContent:'center'
+    justifyContent: 'center',
+    alignItems:'flex-start',
   },
   headerText: {
     fontSize: rMS(13),

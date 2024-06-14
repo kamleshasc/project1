@@ -33,10 +33,10 @@ const TableItem: React.FC<TableItemProps> = ({name, ImgUrl, bunchData}) => {
 const styles = StyleSheet.create({
   container: {
     paddingVertical: rMS(6),
-    paddingHorizontal: rMS(2),
+    paddingHorizontal: rMS(8),
     backgroundColor: colors.primary,
-    width: rS(81),
-    alignItems: 'center',
+    width: rS(83),
+    alignItems: 'flex-start',
     justifyContent: 'center',
     minHeight: 60,
   },

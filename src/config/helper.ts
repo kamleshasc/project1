@@ -1,4 +1,6 @@
 import axios from 'axios';
+import {ImagePickerResponse} from 'react-native-image-picker';
+import {ImagePickerResponseObject} from '../components/UI/CustomModalImagePicker';
 
 export const DateFormateMMMMDDYYY = (value: any) => {
   const date = new Date(value);
@@ -44,4 +46,59 @@ export const deformatMobileNumber = (formattedNumber: string) => {
     exchange,
     subscriber,
   };
+};
+
+export const ImageResponseCheck = (
+  response: ImagePickerResponse,
+): ImagePickerResponseObject => {
+  let errorStatus: boolean;
+  let errorMsg: any;
+  let data: any;
+  if (response.didCancel) {
+    errorStatus = true;
+    errorMsg = 'Image Not Selected';
+    data = null;
+    return {errorStatus, errorMsg, data};
+  } else if (response.errorCode == 'camera_unavailable') {
+    errorStatus = true;
+    errorMsg = 'Camera Not Avaliable';
+    data = null;
+    return {errorStatus, errorMsg, data};
+  } else if (response.errorCode == 'permission') {
+    errorStatus = true;
+    errorMsg = 'This application needs camera permission';
+    data = null;
+    return {errorStatus, errorMsg, data};
+  } else if (response.errorCode == 'others') {
+    errorStatus = true;
+    errorMsg = response.errorMessage;
+    data = null;
+    return {errorStatus, errorMsg, data};
+  } else {
+    const responseResult = response.assets;
+
+    if (!responseResult) {
+      errorStatus = true;
+      errorMsg = 'Image is not supported.';
+      data = null;
+      return {errorStatus, errorMsg, data};
+    }
+
+    const file = responseResult['0'];
+
+    if (
+      file.type !== 'image/jpeg' &&
+      file.type !== 'image/jpg' &&
+      file.type !== 'image/png'
+    ) {
+      errorStatus = true;
+      errorMsg = 'Only .jpeg,.jpg and .png Format Are Supported.';
+      data = null;
+      return {errorStatus, errorMsg, data};
+    }
+    errorStatus = false;
+    errorMsg = '';
+    data = file;
+    return {errorStatus, errorMsg, data};
+  }
 };

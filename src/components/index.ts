@@ -2,6 +2,7 @@ import CustomButton from './UI/CustomButton';
 import CustomDropdown from './UI/CustomDropdown';
 import CustomDropdownMultiSelect from './UI/CustomDropdownMultiSelect';
 import CustomInput from './UI/CustomInput';
+import CustomModalImagePicker from './UI/CustomModalImagePicker';
 import DatePickerUI from './UI/DatePickerUI';
 import TableHeader from './UI/TableHeader';
 import TableItem from './UI/TableItem';
@@ -18,6 +19,7 @@ const UI = {
   DropDown: CustomDropdown,
   DropDownMultiSelect: CustomDropdownMultiSelect,
   Input: CustomInput,
+  ImagePickerModal: CustomModalImagePicker,
 };
 
 const SCREEN = {};

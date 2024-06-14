@@ -34,6 +34,8 @@ export interface ServiceData {
   onsiteOffsite: string;
   status: string;
   selectedUsers: string[];
+  serviceImage: string;
+  createdBy: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -77,6 +79,7 @@ function Services({navigation}: Props): React.JSX.Element {
   const renderItem = ({item}: {item: ServiceData}) => {
     return (
       <UI.TableR onPress={() => onPressService(item)}>
+        <UI.TableI ImgUrl={item.serviceImage} />
         <UI.TableI name={item.serviceName} />
         <UI.TableI name={item.category} />
         <UI.TableI bunchData={item.selectedBranches} />
@@ -107,6 +110,7 @@ function Services({navigation}: Props): React.JSX.Element {
         <View style={style.fullScreen}>
           <UI.TableH
             headers={[
+              'Service Image',
               'Service',
               'Category',
               'Branch',

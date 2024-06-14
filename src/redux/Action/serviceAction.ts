@@ -61,3 +61,20 @@ export const fetchUpdateService = createAsyncThunk(
     }
   },
 );
+
+export const uploadServiceImg = createAsyncThunk(
+  'uploadImg',
+  async (payload: FormData, {rejectWithValue}) => {
+    try {
+      const res = await post({
+        url: '/services/serviceImg',
+        body: payload,
+        hasFormData: true,
+      });
+      return res;
+    } catch (error) {
+      let errorMessage = errorMsgWrap(error);
+      return rejectWithValue(errorMessage);
+    }
+  },
+);

@@ -1,5 +1,12 @@
 import React from 'react';
-import {SafeAreaView, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import colors from '../../config/colors';
 import {rMS} from '../../config/responsive';
 import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native-stack/types';
@@ -16,7 +23,13 @@ import {
 import {useAppDispatch, useAppSelector} from '../../hooks/storeHook';
 import {fetchGetUser} from '../../redux/Action/userAction';
 import {RootState} from '../../redux/store';
-import {fetchService, fetchUpdateService} from '../../redux/Action/serviceAction';
+import {
+  fetchService,
+  fetchUpdateService,
+  uploadServiceImg,
+} from '../../redux/Action/serviceAction';
+import Icon from 'react-native-vector-icons/AntDesign';
+import {ImagePickerResponseObject} from '../../components/UI/CustomModalImagePicker';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EditService'>;
 
@@ -32,6 +45,8 @@ function EditService({route, navigation}: Props) {
     'onsiteOffsite',
     'status',
     'selectedUsers',
+    'serviceImage',
+    'createdBy',
   ];
   const editServiceDispatch = useAppDispatch();
   const {data} = useAppSelector((state: RootState) => state.user.getUser);
@@ -40,6 +55,8 @@ function EditService({route, navigation}: Props) {
   );
   const [messageStatus, setMessageStatus] = React.useState<boolean>(false);
   const [errorMessage, setErrorMessage] = React.useState<any>('');
+  const [showCameraOptions, setShowCameraOptions] =
+    React.useState<boolean>(false);
 
   const {
     serviceName,
@@ -50,6 +67,8 @@ function EditService({route, navigation}: Props) {
     onsiteOffsite,
     status,
     selectedUsers,
+    serviceImage,
+    createdBy,
   } = inputs;
 
   function inputChangedHandler(inputIdentifier: any, enteredValue: any): void {
@@ -73,6 +92,8 @@ function EditService({route, navigation}: Props) {
         onsiteOffsite: onsiteOffsite.value,
         status: status.value,
         selectedUsers: selectedUsers.value,
+        createdBy: createdBy.value,
+        serviceImage: serviceImage.value,
       };
       await editServiceDispatch(
         fetchUpdateService({serviceId, payload}),
@@ -229,6 +250,37 @@ function EditService({route, navigation}: Props) {
     fetchServiceDetails(serviceProp);
   }, []);
 
+  const uploadService = async (image: any) => {
+    try {
+      let formData = new FormData();
+      formData.append('file', {
+        uri:
+          Platform.OS === 'android'
+            ? image.uri
+            : image.uri.replace('file://', ''),
+        name: image.fileName,
+        type: image.type,
+      });
+      let result: any = await editServiceDispatch(
+        uploadServiceImg(formData),
+      ).unwrap();
+      
+      inputChangedHandler('serviceImage', result?.fileName || '');
+    } catch (error) {
+      setMessageStatus(true);
+      setErrorMessage(error);
+    }
+  };
+
+  const handleImagePickerResponse = (res: ImagePickerResponseObject) => {
+    if (!res.errorStatus) {
+      uploadService(res.data);
+    } else {
+      setMessageStatus(res.errorStatus);
+      setErrorMessage(res.errorMsg);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -236,6 +288,13 @@ function EditService({route, navigation}: Props) {
           <View style={styles.headerContainer}>
             <Text style={styles.headerText}>Edit Service</Text>
           </View>
+          <UI.ImagePickerModal
+            showModal={showCameraOptions}
+            modalResponse={handleImagePickerResponse}
+            onCloseModal={() => {
+              setShowCameraOptions(false);
+            }}
+          />
 
           <UI.Input
             textInputConfig={{
@@ -303,17 +362,6 @@ function EditService({route, navigation}: Props) {
             }
           />
 
-          <UI.DropDown
-            data={statusData}
-            placeholder={'Select Status'}
-            value={status.value}
-            isError={!status.isValid}
-            errorMsg={status.message}
-            onChange={(value: any) =>
-              inputChangedHandler('status', value.value)
-            }
-          />
-
           <UI.DropDownMultiSelect
             data={data.map(value => {
               return {
@@ -328,6 +376,43 @@ function EditService({route, navigation}: Props) {
             selected={selectedUsers.value}
             isError={!selectedUsers.isValid}
             errorMsg={selectedUsers.message}
+          />
+
+          <UI.DropDown
+            data={statusData}
+            placeholder={'Select Status'}
+            value={status.value}
+            isError={!status.isValid}
+            errorMsg={status.message}
+            onChange={(value: any) =>
+              inputChangedHandler('status', value.value)
+            }
+          />
+          <UI.Input
+            showIcon={true}
+            disableInput={true}
+            textInputConfig={{
+              value: serviceImage.value,
+              placeholder: 'Upload Img',
+            }}
+            iconPressed={() => setShowCameraOptions(true)}
+            isError={!serviceImage.isValid}
+            errorMsg={serviceImage.message}>
+            <Icon name="upload" size={30} color="black" />
+          </UI.Input>
+
+          <UI.DropDown
+            data={data.map(value => {
+              return {
+                label: value.firstName + ' ' + value.lastName,
+                value: value._id,
+              };
+            })}
+            placeholder={'Created By'}
+            value={createdBy.value}
+            isError={!createdBy.isValid}
+            errorMsg={createdBy.message}
+            onChange={value => inputChangedHandler('createdBy', value.value)}
           />
 
           <View style={styles.btnContainer}>

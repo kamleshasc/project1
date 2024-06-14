@@ -1,12 +1,24 @@
 import React from 'react';
-import {SafeAreaView, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {
+  Alert,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import colors from '../../config/colors';
 import {rMS} from '../../config/responsive';
 import {UI} from '../../components';
 import {useAppDispatch, useAppSelector} from '../../hooks/storeHook';
 import {fetchGetUser} from '../../redux/Action/userAction';
 import {RootState} from '../../redux/store';
-import {fetchAddService, fetchService} from '../../redux/Action/serviceAction';
+import {
+  fetchAddService,
+  fetchService,
+  uploadServiceImg,
+} from '../../redux/Action/serviceAction';
 import {NativeStackScreenProps} from 'react-native-screens/lib/typescript/native-stack/types';
 import {RootStackParamList} from '../../navigation/RootNavigation';
 import {
@@ -16,6 +28,9 @@ import {
   siteData,
   statusData,
 } from '../../config/data';
+import Icon from 'react-native-vector-icons/AntDesign';
+import {PERMISSIONS, RESULTS, request} from 'react-native-permissions';
+import {ImagePickerResponseObject} from '../../components/UI/CustomModalImagePicker';
 
 export interface singleObjString {
   value: string;
@@ -41,6 +56,8 @@ export interface serviceInput {
   selectedBranches: arrayString;
   selectedUsers: arrayString;
   status: singleObjString;
+  serviceImage: singleObjString;
+  createdBy: singleObjString;
 }
 
 export const initialInputs: serviceInput = {
@@ -52,6 +69,8 @@ export const initialInputs: serviceInput = {
   selectedBranches: {value: [], isValid: true, message: ''},
   selectedUsers: {value: [], isValid: true, message: ''},
   status: {value: '', isValid: true, message: ''},
+  serviceImage: {value: '', isValid: true, message: ''},
+  createdBy: {value: '', isValid: true, message: ''},
 };
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AddService'>;
@@ -67,6 +86,8 @@ function AddService({navigation}: Props) {
     onsiteOffsite,
     status,
     selectedUsers,
+    serviceImage,
+    createdBy,
   } = inputs;
   const addServiceDispatch = useAppDispatch();
   const {data} = useAppSelector((state: RootState) => state.user.getUser);
@@ -75,6 +96,7 @@ function AddService({navigation}: Props) {
   );
   const [error, setError] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<any>('');
+  const [showCameraOptions, setShowCameraOptions] = React.useState(false);
   let numbers = /^\d+$/;
 
   function inputChangedHandler(inputIdentifier: any, enteredValue: any): void {
@@ -97,6 +119,8 @@ function AddService({navigation}: Props) {
         selectedBranches: selectedBranches.value,
         selectedUsers: selectedUsers.value,
         status: status.value,
+        serviceImage: serviceImage.value,
+        createdBy: createdBy.value,
       };
       await addServiceDispatch(fetchAddService(payload)).unwrap();
       addServiceDispatch(fetchService());
@@ -124,6 +148,10 @@ function AddService({navigation}: Props) {
     let statusMsg = '';
     let empIsvalid = true;
     let empMsg = '';
+    let serviceIsvalid = true;
+    let serviceMsg = '';
+    let createdByIsvalid = true;
+    let createdByMsg = '';
 
     if (serviceName.value.trim().length <= 0) {
       serviceNameIsvalid = false;
@@ -160,6 +188,14 @@ function AddService({navigation}: Props) {
       empIsvalid = false;
       empMsg = 'Assign Employee is required.';
     }
+    if (serviceImage.value.length <= 0) {
+      serviceIsvalid = false;
+      serviceMsg = 'Service Image is required.';
+    }
+    if (createdBy.value.length <= 0) {
+      createdByIsvalid = false;
+      createdByMsg = 'CreatedBy is required.';
+    }
     if (
       !serviceNameIsvalid ||
       !branchIsvalid ||
@@ -168,7 +204,9 @@ function AddService({navigation}: Props) {
       !priceIsvalid ||
       !siteIsvalid ||
       !statusIsvalid ||
-      !empIsvalid
+      !empIsvalid ||
+      !serviceIsvalid ||
+      !createdByIsvalid
     ) {
       setInputs(curInputs => {
         return {
@@ -213,6 +251,16 @@ function AddService({navigation}: Props) {
             value: curInputs.selectedUsers.value,
             isValid: empIsvalid,
           },
+          serviceImage: {
+            message: serviceMsg,
+            value: curInputs.serviceImage.value,
+            isValid: serviceIsvalid,
+          },
+          createdBy: {
+            message: createdByMsg,
+            value: curInputs.createdBy.value,
+            isValid: createdByIsvalid,
+          },
         };
       });
       return;
@@ -223,6 +271,35 @@ function AddService({navigation}: Props) {
   const getAssignEmployeeDetails = () => {
     addServiceDispatch(fetchGetUser());
   };
+
+  const requestPermissions = async () => {
+    const cameraPermission = await request(
+      Platform.OS === 'ios'
+        ? PERMISSIONS.IOS.CAMERA
+        : PERMISSIONS.ANDROID.CAMERA,
+    );
+    // const photoLibraryPermission = await request(
+    //   Platform.OS === 'ios'
+    //     ? PERMISSIONS.IOS.PHOTO_LIBRARY
+    //     : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE,
+    // );
+
+    console.log(cameraPermission, 'photoLibraryPermission');
+
+    if (
+      cameraPermission !== RESULTS.GRANTED
+      // photoLibraryPermission !== RESULTS.GRANTED
+    ) {
+      Alert.alert(
+        'Permissions required',
+        'This app needs camera and photo library access to function correctly.',
+      );
+    }
+  };
+
+  React.useEffect(() => {
+    requestPermissions();
+  }, []);
 
   React.useEffect(() => {
     getAssignEmployeeDetails();
@@ -235,6 +312,36 @@ function AddService({navigation}: Props) {
     }
   }, [isLoader]);
 
+  const uploadService = async (image: any) => {
+    try {
+      let formData = new FormData();
+      formData.append('file', {
+        uri:
+          Platform.OS === 'android'
+            ? image.uri
+            : image.uri.replace('file://', ''),
+        name: image.fileName,
+        type: image.type,
+      });
+      let result: any = await addServiceDispatch(
+        uploadServiceImg(formData),
+      ).unwrap();
+      inputChangedHandler('serviceImage', result?.fileName || '');
+    } catch (error) {
+      setError(true);
+      setErrorMessage(error);
+    }
+  };
+
+  const handleImagePickerResponse = (res: ImagePickerResponseObject) => {
+    if (!res.errorStatus) {
+      uploadService(res.data);
+    } else {
+      setError(res.errorStatus);
+      setErrorMessage(res.errorMsg);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -242,6 +349,13 @@ function AddService({navigation}: Props) {
           <View style={styles.headerContainer}>
             <Text style={styles.headerText}>Add New Service</Text>
           </View>
+          <UI.ImagePickerModal
+            showModal={showCameraOptions}
+            modalResponse={handleImagePickerResponse}
+            onCloseModal={() => {
+              setShowCameraOptions(false);
+            }}
+          />
 
           <UI.Input
             textInputConfig={{
@@ -324,6 +438,7 @@ function AddService({navigation}: Props) {
             isError={!selectedUsers.isValid}
             errorMsg={selectedUsers.message}
           />
+
           <UI.DropDown
             data={statusData}
             placeholder={'Select Status'}
@@ -331,6 +446,33 @@ function AddService({navigation}: Props) {
             isError={!status.isValid}
             errorMsg={status.message}
             onChange={value => inputChangedHandler('status', value.value)}
+          />
+
+          <UI.Input
+            showIcon={true}
+            disableInput={true}
+            textInputConfig={{
+              value: serviceImage.value,
+              placeholder: 'Upload Img',
+            }}
+            iconPressed={() => setShowCameraOptions(true)}
+            isError={!serviceImage.isValid}
+            errorMsg={serviceImage.message}>
+            <Icon name="upload" size={30} color="black" />
+          </UI.Input>
+
+          <UI.DropDown
+            data={data.map(value => {
+              return {
+                label: value.firstName + ' ' + value.lastName,
+                value: value._id,
+              };
+            })}
+            placeholder={'Created By'}
+            value={createdBy.value}
+            isError={!createdBy.isValid}
+            errorMsg={createdBy.message}
+            onChange={value => inputChangedHandler('createdBy', value.value)}
           />
 
           <View style={styles.btnContainer}>
