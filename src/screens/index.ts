@@ -1,4 +1,5 @@
 import CLIENT from './Client';
+import COMMISSIONRULESCREENS from './CommissionRule';
 import DASHBOARD from './Dashboard';
 import INVENTORY from './Inventory';
 import PACKAGE from './Package';
@@ -14,6 +15,7 @@ const SCREENS = {
   PRICE,
   SERVICE,
   USER,
+  COMMISSIONRULESCREENS,
 };
 
 export default SCREENS;

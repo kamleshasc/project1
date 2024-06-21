@@ -14,6 +14,7 @@ export type DrawerNavigationParamList = {
   Clients: undefined;
   Price: undefined;
   Inventory: undefined;
+  CommissionRules: undefined;
 };
 
 export type DrawerNavigationPropList =
@@ -42,6 +43,10 @@ function DrawerNavigation() {
       <Drawer.Screen
         name="Inventory"
         component={SCREENS.INVENTORY.inventorys}
+      />
+      <Drawer.Screen
+        name="CommissionRules"
+        component={SCREENS.COMMISSIONRULESCREENS.commissionRules}
       />
     </Drawer.Navigator>
   );

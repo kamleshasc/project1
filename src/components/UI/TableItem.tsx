@@ -4,7 +4,7 @@ import {rMS, rS} from '../../config/responsive';
 import colors from '../../config/colors';
 
 interface TableItemProps {
-  name?: string;
+  name?: string | number;
   ImgUrl?: string;
   bunchData?: any[];
 }

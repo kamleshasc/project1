@@ -8,6 +8,8 @@ import colors from '../config/colors';
 import {UserData} from '../screens/User/Users';
 import {ServiceData} from '../screens/Service/Services';
 import SCREENS from '../screens';
+import {ClientsData} from '../screens/Client/Clients';
+import {InventoryData} from '../screens/Inventory/Inventory';
 
 export type RootStackParamList = {
   DrawerNavigation: undefined;
@@ -15,6 +17,12 @@ export type RootStackParamList = {
   EditUser: {user: UserData};
   AddService: undefined;
   EditService: {service: ServiceData};
+  AddClient: undefined;
+  EditClient: {client: ClientsData};
+  AddInventory: undefined;
+  EditInventory: {inventory: InventoryData};
+  AddCommissionRule: undefined;
+  EditCommissionRule: undefined;
 };
 
 export type RootStackNavigationProp = StackNavigationProp<RootStackParamList>;
@@ -53,6 +61,36 @@ function RootNavigation() {
       <Stack.Screen
         name="EditService"
         component={SCREENS.SERVICE.editService}
+        options={{headerShown: true}}
+      />
+      <Stack.Screen
+        name="AddClient"
+        component={SCREENS.CLIENT.addClient}
+        options={{headerShown: true}}
+      />
+      <Stack.Screen
+        name="EditClient"
+        component={SCREENS.CLIENT.editClient}
+        options={{headerShown: true}}
+      />
+      <Stack.Screen
+        name="AddInventory"
+        component={SCREENS.INVENTORY.addInventory}
+        options={{headerShown: true}}
+      />
+      <Stack.Screen
+        name="EditInventory"
+        component={SCREENS.INVENTORY.editInventory}
+        options={{headerShown: true}}
+      />
+      <Stack.Screen
+        name="AddCommissionRule"
+        component={SCREENS.COMMISSIONRULESCREENS.addCommissionRule}
+        options={{headerShown: true}}
+      />
+      <Stack.Screen
+        name="EditCommissionRule"
+        component={SCREENS.COMMISSIONRULESCREENS.editCommissionRule}
         options={{headerShown: true}}
       />
     </Stack.Navigator>

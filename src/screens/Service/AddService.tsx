@@ -29,7 +29,6 @@ import {
   statusData,
 } from '../../config/data';
 import Icon from 'react-native-vector-icons/AntDesign';
-import {PERMISSIONS, RESULTS, request} from 'react-native-permissions';
 import {ImagePickerResponseObject} from '../../components/UI/CustomModalImagePicker';
 
 export interface singleObjString {
@@ -94,9 +93,10 @@ function AddService({navigation}: Props) {
   const {isLoader, isError, errorMsg} = useAppSelector(
     (state: RootState) => state.service.addService,
   );
-  const [error, setError] = React.useState(false);
+  const [error, setError] = React.useState<boolean>(false);
   const [errorMessage, setErrorMessage] = React.useState<any>('');
-  const [showCameraOptions, setShowCameraOptions] = React.useState(false);
+  const [showCameraOptions, setShowCameraOptions] =
+    React.useState<boolean>(false);
   let numbers = /^\d+$/;
 
   function inputChangedHandler(inputIdentifier: any, enteredValue: any): void {
@@ -271,35 +271,6 @@ function AddService({navigation}: Props) {
   const getAssignEmployeeDetails = () => {
     addServiceDispatch(fetchGetUser());
   };
-
-  const requestPermissions = async () => {
-    const cameraPermission = await request(
-      Platform.OS === 'ios'
-        ? PERMISSIONS.IOS.CAMERA
-        : PERMISSIONS.ANDROID.CAMERA,
-    );
-    // const photoLibraryPermission = await request(
-    //   Platform.OS === 'ios'
-    //     ? PERMISSIONS.IOS.PHOTO_LIBRARY
-    //     : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE,
-    // );
-
-    console.log(cameraPermission, 'photoLibraryPermission');
-
-    if (
-      cameraPermission !== RESULTS.GRANTED
-      // photoLibraryPermission !== RESULTS.GRANTED
-    ) {
-      Alert.alert(
-        'Permissions required',
-        'This app needs camera and photo library access to function correctly.',
-      );
-    }
-  };
-
-  React.useEffect(() => {
-    requestPermissions();
-  }, []);
 
   React.useEffect(() => {
     getAssignEmployeeDetails();
