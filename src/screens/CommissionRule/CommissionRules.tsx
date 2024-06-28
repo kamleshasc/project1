@@ -1,14 +1,10 @@
 import React from 'react';
 import {
   FlatList,
-  RefreshControl,
   SafeAreaView,
-  ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
-  useWindowDimensions,
 } from 'react-native';
 import colors from '../../config/colors';
 import {CompositeScreenProps} from '@react-navigation/native';
@@ -18,15 +14,39 @@ import {StackScreenProps} from '@react-navigation/stack';
 import {RootStackParamList} from '../../navigation/RootNavigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {UI} from '../../components';
-import {rMS, rV} from '../../config/responsive';
+import {useAppDispatch, useAppSelector} from '../../hooks/storeHook';
+import {fetchCommissionRules} from '../../redux/Action/commissionRuleAction';
+import {clearGetCommissionRuleErrorMsg} from '../../redux/Reducer/commissionRuleReducer/getCommissionRuleSlice';
+import {DateFormateMMMMDDYYY} from '../../config/helper';
 
 type CommissionType = CompositeScreenProps<
   DrawerScreenProps<DrawerNavigationParamList, 'CommissionRules'>,
   StackScreenProps<RootStackParamList>
 >;
+interface objUserValue {
+  _id: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface commissionRuleData {
+  _id: string;
+  name: string;
+  criteria: string;
+  value: number;
+  applicableUser: objUserValue[];
+  createdBy: objUserValue;
+  updatedBy: objUserValue;
+  createdAt: string;
+  updatedAt: string;
+}
 
 function CommissionRules({navigation}: CommissionType) {
-  const {width} = useWindowDimensions();
+  const dispatchGetCommissionRule = useAppDispatch();
+  const {data, errorMsg, isError, isLoader} = useAppSelector(
+    state => state.commissionRule.getCommission,
+  );
+
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -39,36 +59,45 @@ function CommissionRules({navigation}: CommissionType) {
     });
   }, [navigation]);
 
-  function renderItem({item}) {
+  const getCommissionRule = () => {
+    dispatchGetCommissionRule(fetchCommissionRules());
+  };
+
+  React.useEffect(() => {
+    getCommissionRule();
+  }, []);
+
+  function renderItem({item}: {item: commissionRuleData}) {
     return (
       <UI.TableR
         onPress={() => {
-          navigation.navigate('EditCommissionRule');
+          navigation.navigate('EditCommissionRule', {commissionRule: item});
         }}>
-        <UI.TableI name={'First name Value'} />
-        <UI.TableI name={'Criteria Value'} />
-        <UI.TableI name={'Value value'} />
-        <UI.TableI name={'Applicable user value'} />
-        <UI.TableI name={'Created value'} />
-        <UI.TableI name={'CreatedBy value'} />
-        <UI.TableI name={'Updated value'} />
-        <UI.TableI name={'UpdatedBy value'} />
+        <UI.TableI name={item.name} />
+        <UI.TableI name={item.criteria} />
+        <UI.TableI name={item.value.toFixed(2)} />
+        <UI.TableI
+          bunchData={item.applicableUser.map(
+            value => value.firstName + ' ' + value.lastName,
+          )}
+        />
+        <UI.TableI
+          name={item.createdBy.firstName + ' ' + item.createdBy.lastName}
+        />
+        <UI.TableI
+          name={item.updatedBy.firstName + ' ' + item.updatedBy.lastName}
+        />
+        <UI.TableI name={DateFormateMMMMDDYYY(item.createdAt)} />
+        <UI.TableI name={DateFormateMMMMDDYYY(item.updatedAt)} />
       </UI.TableR>
     );
   }
 
   return (
     <SafeAreaView style={style.container}>
-      {/* <ScrollView
-        style={style.fullScreen}
-        horizontal={true}
-        refreshControl={
-          <RefreshControl refreshing={isLoader} onRefresh={getUserList} />
-        }
-      > */}
       <FlatList
-        // onRefresh={}
-        // refreshing={}
+        onRefresh={() => getCommissionRule()}
+        refreshing={isLoader}
         data={new Array(1)}
         horizontal={true}
         renderItem={() => (
@@ -79,14 +108,14 @@ function CommissionRules({navigation}: CommissionType) {
                 'Criteria',
                 'Value',
                 'Applicable User',
-                'Created Date',
                 'Created By',
-                'Updated Date',
                 'Updated By',
+                'Created Date',
+                'Updated Date',
               ]}
             />
             <FlatList
-              data={new Array(2)}
+              data={data}
               renderItem={renderItem}
               keyExtractor={(_, index) => index.toString()}
             />
@@ -94,11 +123,13 @@ function CommissionRules({navigation}: CommissionType) {
         )}
         keyExtractor={(_, index) => index.toString()}
       />
-      {/* <UI.Toast
-        visible={showError}
+      <UI.Toast
+        visible={isError}
         message={errorMsg}
-        onDismissSnackBar={() => setShowError(false)}
-      /> */}
+        onDismissSnackBar={() =>
+          dispatchGetCommissionRule(clearGetCommissionRuleErrorMsg())
+        }
+      />
     </SafeAreaView>
   );
 }

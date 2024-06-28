@@ -426,6 +426,7 @@ function AddUser({navigation}: Props): React.JSX.Element {
               onChangeText: (value: any) =>
                 inputChangedHandler('mobileNumber', value),
               value: mobileNumber.value,
+              keyboardType: 'number-pad',
             }}
             isError={!mobileNumber.isValid}
             errorMsg={mobileNumber.message}

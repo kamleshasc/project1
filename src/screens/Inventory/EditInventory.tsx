@@ -33,6 +33,8 @@ function EditInventory({navigation, route}: EditInventoryProp) {
   const {isError, errorMsg, isLoader} = useAppSelector(
     root => root.inventory.addInventory,
   );
+  const [showError, setShowError] = React.useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = React.useState<any>('');
   const fieldsKeys = [
     'name',
     'unit',
@@ -72,6 +74,13 @@ function EditInventory({navigation, route}: EditInventoryProp) {
     getUserDetails();
   }, []);
 
+  React.useEffect(() => {
+    if (!showError && isError) {
+      setShowError(isError);
+      setErrorMessage(errorMsg);
+    }
+  }, [isLoader]);
+
   const inputChangedHandler = (inputIdentifier: any, enteredValue: any) => {
     try {
       setInputs(curInputs => {
@@ -106,7 +115,8 @@ function EditInventory({navigation, route}: EditInventoryProp) {
         dispatchEditInventory(fetchInventory());
       }
     } catch (error) {
-      console.log(error, 'errrrrr');
+      setShowError(isError);
+      setErrorMessage(error);
     }
   };
 

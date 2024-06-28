@@ -10,6 +10,7 @@ import {ServiceData} from '../screens/Service/Services';
 import SCREENS from '../screens';
 import {ClientsData} from '../screens/Client/Clients';
 import {InventoryData} from '../screens/Inventory/Inventory';
+import {commissionRuleData} from '../screens/CommissionRule/CommissionRules';
 
 export type RootStackParamList = {
   DrawerNavigation: undefined;
@@ -22,7 +23,9 @@ export type RootStackParamList = {
   AddInventory: undefined;
   EditInventory: {inventory: InventoryData};
   AddCommissionRule: undefined;
-  EditCommissionRule: undefined;
+  EditCommissionRule: {commissionRule: commissionRuleData};
+  AddInvoice: undefined;
+  EditInvoice: undefined;
 };
 
 export type RootStackNavigationProp = StackNavigationProp<RootStackParamList>;
@@ -91,6 +94,16 @@ function RootNavigation() {
       <Stack.Screen
         name="EditCommissionRule"
         component={SCREENS.COMMISSIONRULESCREENS.editCommissionRule}
+        options={{headerShown: true}}
+      />
+      <Stack.Screen
+        name="AddInvoice"
+        component={SCREENS.INVOICESCREENS.addInvoice}
+        options={{headerShown: true}}
+      />
+      <Stack.Screen
+        name="EditInvoice"
+        component={SCREENS.INVOICESCREENS.editInvoice}
         options={{headerShown: true}}
       />
     </Stack.Navigator>

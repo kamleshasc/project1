@@ -58,6 +58,8 @@ function AddInventory({navigation}: AddInventoryProp) {
   const {isError, errorMsg, isLoader} = useAppSelector(
     root => root.inventory.addInventory,
   );
+  const [showError, setShowError] = React.useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = React.useState<any>('');
 
   const getUserDetails = () => {
     dispatchAddInventory(fetchGetUser());
@@ -66,6 +68,13 @@ function AddInventory({navigation}: AddInventoryProp) {
   React.useEffect(() => {
     getUserDetails();
   }, []);
+
+  React.useEffect(() => {
+    if (!showError && isError) {
+      setShowError(isError);
+      setErrorMessage(errorMsg);
+    }
+  }, [isLoader]);
 
   const inputChangedHandler = (inputIdentifier: any, enteredValue: any) => {
     try {
@@ -97,7 +106,10 @@ function AddInventory({navigation}: AddInventoryProp) {
         navigation.goBack();
         dispatchAddInventory(fetchInventory());
       }
-    } catch (error) {}
+    } catch (error) {
+      setShowError(true);
+      setErrorMessage(error);
+    }
   };
 
   const checkValidation = () => {
@@ -302,9 +314,9 @@ function AddInventory({navigation}: AddInventoryProp) {
         </View>
       </ScrollView>
       <UI.Toast
-        message={errorMsg}
-        visible={isError}
-        onDismissSnackBar={() => dispatchAddInventory(clearAddInventoryData())}
+        message={errorMessage}
+        visible={showError}
+        onDismissSnackBar={() => setShowError(false)}
       />
     </SafeAreaView>
   );

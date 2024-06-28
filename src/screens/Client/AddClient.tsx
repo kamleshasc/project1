@@ -447,7 +447,7 @@ const styles = StyleSheet.create({
   },
   subContainer: {
     maxWidth: 600,
-    alignSelf: 'center',
+    // alignSelf: 'center',
     flex: 1,
   },
   btnContainer: {

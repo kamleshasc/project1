@@ -8,6 +8,7 @@ import TableHeader from './UI/TableHeader';
 import TableItem from './UI/TableItem';
 import TableRow from './UI/TableRow';
 import ToastMessage from './UI/ToastMessage';
+import DropDownWithItemList from './screen/Invoice/DropDownWithItemList';
 
 const UI = {
   TableH: TableHeader,
@@ -22,6 +23,8 @@ const UI = {
   ImagePickerModal: CustomModalImagePicker,
 };
 
-const SCREEN = {};
+const SCREEN = {
+  DropDownWithList: DropDownWithItemList,
+};
 
 export {UI, SCREEN};
